@@ -1,0 +1,47 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow-y: hidden;
+  user-select: none;
+}
+
+@font-face {
+  font-family: "hs";
+  src: url("./fonts/hs.woff2");
+}
+
+p,
+span,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "hs";
+}
+
+
+:root{
+  --scroll-zdy-width: 6px;
+  --cp-home-every-card-width:
+}
+.scrollbar::-webkit-scrollbar {
+  width: var(--scroll-zdy-width);
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  border-radius: 2px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background: #b9b9b949;
+  border-radius: 10px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cfcfcf;
+  /* --scroll-zdy-width:10px; */
+  width: 10px;
+}
