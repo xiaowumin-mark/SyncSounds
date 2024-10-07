@@ -5,12 +5,13 @@ import '@mdui/icons/date-range.js';
 import router from '@/router';
 import { ref } from 'vue';
 const join = ref(null)
+const my_drawer = ref(null)
 const TSNpush = (path) => {
-    if (document.startViewTransition){
+    if (document.startViewTransition) {
         document.startViewTransition(() => {
             router.push(path);
         })
-    }else{
+    } else {
         router.push(path);
     }
 }; 
@@ -55,12 +56,14 @@ const TSNpush = (path) => {
 
     </div>
     <mdui-dialog close-on-overlay-click headline="加入房间" ref="join">
-            <mdui-text-field variant="outlined" label="输入房间号" style="margin-top: 10px;"></mdui-text-field>
-            
+        <mdui-text-field variant="outlined" label="输入房间号" style="margin-top: 10px;"></mdui-text-field>
+
         <mdui-button slot="action" variant="text" @click="join.open = false">取消</mdui-button>
         <mdui-button slot="action" variant="tonal" @click="join.open = false">确定</mdui-button>
     </mdui-dialog>
-
+    <mdui-navigation-drawer modal close-on-esc close-on-overlay-click ref="my_drawer">
+        <mdui-button class="close">关闭侧边抽屉栏</mdui-button>
+    </mdui-navigation-drawer>
 </template>
 
 <style scoped>

@@ -49,6 +49,7 @@ const TSNpush = (path) => {
 <style scoped>
 .main_m {
   height: 100vh;
+  width: 100%;
 }
 
 @media only screen and (max-width: 600px) {

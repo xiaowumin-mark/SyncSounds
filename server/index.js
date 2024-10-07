@@ -12,7 +12,14 @@ const { generateToken, verifyToken } = require('./jwt.js');
 const { v4: uuid } = require('uuid');
 const fs = require('fs');
 const mtpy = require('multiparty');
-const { search, song_detail, lyric, song_download_url } = require('NeteaseCloudMusicApi');
+const { search,
+    song_detail,
+    lyric,
+    song_download_url,
+    user_account,
+    user_playlist,
+    playlist_track_all
+} = require('NeteaseCloudMusicApi');
 const axios = require('axios');
 
 let app = express();
@@ -344,18 +351,155 @@ app.post("/api/song/addData", async (req, res) => {
     });
 })
 
+app.post("/api/song/addMoreMusic", (req, res) => {
+    const fd = new mtpy.Form();
+    fd.uploadDir = path.join(__dirname, 'static', "music");
+    fd.encoding = 'utf-8';
+    fd.parse(req, async function (err, fields, files) {
+        verifyToken(fields.token[0]).then(async user => {
+
+            try {
+                let songid = fields.id[0];
+                song_detail({
+                    ids: `${songid}`
+                }).then(async data => {
+                    /* res.json({
+                        code: 200,
+                        msg: "添加成功",
+                        data: data.body.songs[0]
+                    }) */
+                    let song = data.body.songs[0];
+                    //let fee = song.fee;
+                    /* fee: enum,
+                      0: 免费或无版权
+                      1: VIP 歌曲
+                      4: 购买专辑
+                      8: 非会员可免费播放低音质，会员可播放高音质及下载 */
+                    /*                     if (fee == 1) {
+                    
+                                            res.json({
+                                                code: 500,
+                                                msg: "该歌曲为付费歌曲",
+                                                data: null
+                                            })
+                                            return
+                                        } else if (fee == 4) { // 付费专辑
+                                            res.json({
+                                                code: 500,
+                                                msg: "该歌曲为付费专辑",
+                                                data: null
+                                            })
+                                            return
+                                        } */
+
+
+
+
+                    // 判断是否已经存在
+                    let song_exist = await Songs.findOne({
+                        where: {
+                            id: song.id
+                        }
+                    });
+                    if (!song_exist) { // 不存在
+                        console.log({
+                            music_id: String(song.id),
+                            name: song.name,
+                            singer: song.ar[0].name,
+                            all_time: song.dt,
+                            image: song.al.picUrl,
+                            is_public: true
+                        });
+
+                        let Song = await Songs.create({
+                            music_id: String(song.id),
+                            name: song.name,
+                            singer: song.ar[0].name,
+                            all_time: song.dt,
+                            image: song.al.picUrl,
+                            is_public: 1,
+                            file: "/static/music/" + spPath(files.file[0].path)
+                        });
+                        res.json({
+                            code: 200,
+                            msg: "添加成功",
+                            data: Song
+                        })
+
+                        lyric({
+                            id: song.id
+                        }).then(data => {
+                            let lyric = data.body.lrc.lyric;
+                            Song.update({
+                                lyric: lyric
+                            });
+                        });
+
+                    } else { // 存在
+                        res.json({
+                            code: 200,
+                            msg: "已存在",
+                            data: song_exist
+                        })
+                    }
+                }).catch(e => {
+                    console.log(e);
+                    res.json({
+                        code: 500,
+                        msg: "添加失败",
+                        data: null
+                    })
+                });
+            }
+            catch (e) {
+                res.json({
+                    code: 500,
+                    msg: "用户不存在",
+                    data: null
+                })
+            }
+        }).catch(err => {
+            res.json({
+                code: 500,
+                msg: "token错误",
+                data: null
+            })
+        });
+
+
+
+        /* res.json({
+            code: 200,
+            msg: "上传成功",
+            data: null
+        }) */
+
+
+
+    })
+
+});
+
 app.get("/api/song", async (req, res) => {
+    let limit = req.query.limit ? Number(req.query.limit) : 10;
+    let offset = req.query.offset ? Number(req.query.offset) : 0;
+    // 分页查询
     let songs = await Songs.findAll({
-        where: {
-            is_public: 1
-        }
+        limit: limit,
+        offset: offset
     });
+
     res.json({
         code: 200,
         msg: "获取成功",
-        data: songs
+        data: songs,
+        count: await Songs.count(),
+        limit: limit,
+        offset: offset,
     });
 })
+
+
 
 app.post("/api/room/new", async (req, res) => {
     // name,instruction,allow_peeople_num,ispublic,password,songs
@@ -424,6 +568,74 @@ app.post("/api/room/remove", async (req, res) => {
         res.json({
             code: 500,
             msg: "token错误",
+            data: null
+        })
+    });
+
+})
+
+app.post("/api/wy/user_info", async (req, res) => {
+    let cookie = req.body.cookie;
+    user_account({
+        cookie: cookie
+    }).then(data => {
+        res.json({
+            code: 200,
+            msg: "获取成功",
+            data: data.body
+        })
+    }).catch(err => {
+        console.log(err);
+        res.json({
+            code: 500,
+            msg: "获取失败",
+            data: null
+        })
+    });
+
+})
+
+app.post("/api/wy/songlist", async (req, res) => {
+    let cookie = req.body.cookie;
+    let uid = req.query.uid;
+    user_playlist(
+        {
+            cookie: cookie,
+            uid: uid
+        }).then(data => {
+            res.json({
+                code: 200,
+                msg: "获取成功",
+                data: data.body
+            })
+
+        }).catch(err => {
+            console.log(err);
+            res.json({
+                code: 500,
+                msg: "获取失败",
+                data: null
+            })
+        })
+})
+
+app.get("/api/wy/songListAllMysic", async (req, res) => {
+    let cookie = req.body.cookie;
+    let id = req.query.id;
+    playlist_track_all({
+        cookie: cookie,
+        id: id
+    }).then(data => {
+        res.json({
+            code: 200,
+            msg: "获取成功",
+            data: data.body
+        })
+    }).catch(err => {
+        console.log(err);
+        res.json({
+            code: 500,
+            msg: "获取失败",
             data: null
         })
     });

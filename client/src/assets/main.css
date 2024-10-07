@@ -45,3 +45,15 @@ h6 {
   /* --scroll-zdy-width:10px; */
   width: 10px;
 }
+
+.no_scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome Safari */
+  width: 0px;
+}
+
+.no_scrollbar {
+  scrollbar-width: none; /* firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  overflow-x: hidden;
+  overflow-y: auto;
+}

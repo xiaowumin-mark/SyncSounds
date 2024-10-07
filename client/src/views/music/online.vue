@@ -149,13 +149,66 @@
         </div>
     </mdui-dialog>
 
-    <mdui-dialog close-on-overlay-click fullscreen ref="message_dia">
+    <mdui-dialog close-on-overlay-click fullscreen ref="message_dia" style="padding: 0 !important;">
         <mdui-top-app-bar slot="header">
             <mdui-top-app-bar-title>房间消息</mdui-top-app-bar-title>
             <mdui-button-icon icon="close" @click="message_dia.open = false"></mdui-button-icon>
         </mdui-top-app-bar>
-        <div style="height: 100%;overflow-y: auto;" class="scrollbar">
-            
+        <div style="height: auto;overflow-y: auto;padding-bottom: 50px" class="no_scrollbar">
+            <div class="chat_box">
+                <div class="left">
+                    <img src="https://foruda.gitee.com/avatar/1720864383166909386/9548756_hycnb_1720864383.png!avatar200"
+                        alt="" srcset="">
+                </div>
+                <div class="main">
+                    <div class="title">
+                        无语
+                    </div>
+                    <div class="content">
+                        枣殇嚎
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat_box_r">
+                <div class="right">
+                    <img src="https://avatars.githubusercontent.com/u/3030330?s=40&v=4" alt="" srcset="">
+                </div>
+                <div class="main">
+                    <div class="content">
+                        泥嚎
+                    </div>
+                </div>
+
+            </div>
+            <div class="chat_box_r">
+                <div class="right">
+                    <img src="https://avatars.githubusercontent.com/u/3030330?s=40&v=4" alt="" srcset="">
+                </div>
+                <div class="main">
+                    <div class="content">
+                        泥嚎泥嚎
+                    </div>
+                </div>
+
+            </div>
+            <div class="chat_box" v-for="i in 20">
+                <div class="left">
+                    <img src="https://foruda.gitee.com/avatar/1720864383166909386/9548756_hycnb_1720864383.png!avatar200"
+                        alt="" srcset="">
+                </div>
+                <div class="main">
+                    <div class="title">
+                        无语
+                    </div>
+                    <div class="content">
+                        枣殇嚎啊
+                    </div>
+                </div>
+            </div>
+            <mdui-text-field label="输入内容" style="width: calc(100% - 40px);position: fixed;bottom: 20px;right: 20px;">
+                <mdui-button-icon slot="end-icon" icon="send"></mdui-button-icon>
+            </mdui-text-field>
         </div>
     </mdui-dialog>
 
@@ -188,9 +241,15 @@ const enter = () => {
 }
 
 const goback = () => {
-    document.startViewTransition(() => {
+    if (document.startViewTransition) {
+        document.startViewTransition(() => {
+            router.go(-1);
+        })
+    } else {
         router.go(-1);
-    })
+    }
+
+
 }
 
 const music = ref(null);
@@ -406,10 +465,11 @@ const tooglePlay = () => {
 
 .ctx .content {
     width: 100%;
-    height: calc(100% - 410px);
+    height: calc(100% - 360px);
     padding: 25px;
     padding-bottom: 0px;
     box-sizing: border-box;
+    overflow: hidden;
 
 }
 
@@ -430,9 +490,9 @@ const tooglePlay = () => {
 
 .ctx .content .lyric {
     width: 100%;
-    height: calc(100% - 330px);
+    height: calc(100% - 40vh - 50px);
     margin: 0 auto;
-    margin-top: 35px;
+    margin-top: 20px;
 }
 
 .ctx .footer {
@@ -442,7 +502,7 @@ const tooglePlay = () => {
 
 .ctx .footer .btns {
     width: 100%;
-    height: 75px;
+    height: 45px;
     padding-left: 25px;
     padding-right: 25px;
     box-sizing: border-box;
@@ -509,4 +569,106 @@ const tooglePlay = () => {
     justify-content: center;
     align-items: center;
 }
+
+.chat_box {
+    width: 100%;
+    margin-bottom: 10px;
+    display: inline-block;
+    height: auto;
+}
+
+.chat_box .left {
+    width: 45px;
+    height: 45px;
+    float: left;
+    border-radius: 15px;
+}
+
+.chat_box .left img {
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+}
+
+.chat_box .main {
+    width: calc(100% - 80px);
+    min-height: 50px;
+    float: left;
+    margin-left: 5px;
+
+}
+
+.chat_box .main .content {
+    width: auto;
+    height: auto;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: rgb(255, 255, 255);
+    border-radius: 3px 15px 15px 15px;
+    display: inline-block;
+    max-width: calc(100% - 20px);
+}
+
+.chat_box .main .title {
+    font-size: 12px;
+    line-height: 25px;
+}
+
+.chat_box_r {
+    width: 100%;
+    margin-bottom: 10px;
+    display: inline-block;
+    height: auto;
+}
+
+.chat_box_r .right {
+    width: 45px;
+    height: 45px;
+    float: right;
+    border-radius: 15px;
+}
+
+.chat_box_r .right img {
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+}
+
+.chat_box_r .main {
+    width: calc(100% - 80px);
+    min-height: 50px;
+    float: right;
+    margin-right: 5px;
+
+}
+
+.chat_box_r .main .content {
+    width: auto;
+    height: auto;
+    padding: 10px;
+    float: right;
+    box-sizing: border-box;
+    background-color: #DFE0FC;
+    border-radius: 15px 3px 15px 15px;
+    display: inline-block;
+    max-width: calc(100% - 20px);
+}
+
+
+@media screen and (min-width: 860px) {
+    .ctx .content .image {
+        width: 50%;
+        height: calc(100% - 100px);
+        float: left;
+    }
+
+    .ctx .content .lyric {
+        width: 50%;
+        height: 100%;
+        margin-top: 0px;
+    }
+
+}
+
+
 </style>
