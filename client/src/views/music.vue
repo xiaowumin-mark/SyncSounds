@@ -1,11 +1,12 @@
 <script setup>
 import { ref } from 'vue'
-import { getUserInfo, getUserSongList } from "@/assets/wy"
+import { getUserInfo, getUserSongList, songListDetail as lodaSongListData } from "@/assets/wy"
 const usetInfo = ref({})
 const songList = ref(null)
 const mySongList = ref({})
 const songListDetail = ref(null)
-/* getUserInfo(localStorage.wyCookie).then(res => {
+const songListData = ref([])
+getUserInfo(localStorage.wyCookie).then(res => {
     console.log(res);
 
     usetInfo.value = res
@@ -13,10 +14,17 @@ const songListDetail = ref(null)
         console.log(res);
         mySongList.value = res
     }).catch(err => { console.log(err) })
-}).catch(err => { console.log(err) }) */
+}).catch(err => { console.log(err) })
 
 const loadSongListDetail = (id) => {
-    
+    songListData.value = []
+    songListDetail.value.open = true
+    lodaSongListData(localStorage.wyCookie, id).then(res => {
+        console.log(res);
+
+        songListData.value = res
+
+    })
 }
 
 </script>
@@ -109,7 +117,8 @@ const loadSongListDetail = (id) => {
                 <mdui-list-subheader>我的歌单
                 </mdui-list-subheader>
                 <mdui-dropdown trigger="contextmenu" open-on-pointer v-for="i in mySongList" :key="i.id">
-                    <mdui-list-item rounded slot="trigger" headline-line="1" description-line="2" @click="loadSongListDetail(i.id)">
+                    <mdui-list-item rounded slot="trigger" headline-line="1" description-line="2"
+                        @click="loadSongListDetail(i.id)">
                         {{ i.name }}
                         <mdui-avatar slot="icon" :src="i.coverImgUrl"></mdui-avatar>
                         <span slot="description">{{ i.description ? i.description : "暂无简介" }}</span>
@@ -133,24 +142,15 @@ const loadSongListDetail = (id) => {
         </mdui-top-app-bar>
         <div style="height: 100%;overflow-y: auto;" class="scrollbar">
             <mdui-list>
+                <mdui-list-item rounded v-for="item in songListData" :key="item.id" headline-line="1" description-line="2">
+                    {{ item.name }}
+                    <mdui-avatar slot="icon" :src="item.al.picUrl"></mdui-avatar>
+                    <span slot="description">{{ item.ar.map(function (item) { return item.name; }).join("-") }}</span>
+                </mdui-list-item>
 
-                <mdui-dropdown trigger="contextmenu" open-on-pointer v-for="i in 12" :key="i">
-                    <mdui-list-item rounded slot="trigger">
-                        Headline
-                        <mdui-avatar slot="icon"
-                            src="https://avatars.githubusercontent.com/u/3030330?s=40&v=4"></mdui-avatar>
-                        <span slot="description" v-show="i == 1">房主</span>
-                        <span slot="description" v-show="i >= 2 && i <= 8">管理员</span>
-                    </mdui-list-item>
-                    <mdui-menu>
-                        <mdui-menu-item>取消管理员</mdui-menu-item>
-                        <mdui-menu-item>设为管理员</mdui-menu-item>
-                        <mdui-menu-item>踢出房间</mdui-menu-item>
-
-                    </mdui-menu>
-                </mdui-dropdown>
             </mdui-list>
         </div>
+
     </mdui-dialog>
 </template>
 

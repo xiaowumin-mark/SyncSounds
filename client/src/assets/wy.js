@@ -34,7 +34,7 @@ function getUserInfo(cookie) {
     })
 }
 
-function getUserSongList(cookie,uid) {
+function getUserSongList(cookie, uid) {
     return new Promise((resolve, reject) => {
         if (!cookie || !uid) {
             reject("cookie为空")
@@ -63,7 +63,7 @@ function getUserSongList(cookie,uid) {
     })
 }
 
-function songListDetail(cookie,id) {
+function songListDetail(cookie, id) {
     return new Promise((resolve, reject) => {
         if (!cookie || !id) {
             reject("cookie为空")
@@ -78,7 +78,17 @@ function songListDetail(cookie,id) {
             headers: {
                 "Content-Type": "application/json"
             }
-         }
+        }).then(res => res.json()).then(({ code, data }) => {
+            let DATA = data
+            console.log(DATA);
+            if (DATA.code === 200) {
+                resolve(DATA.songs)
+            } else {
+                reject("获取歌单详情失败")
+            }
+        }).catch(err => {
+            reject("获取歌单详情失败")
+        })
     })
 }
-export { getUserInfo , getUserSongList }
+export { getUserInfo, getUserSongList , songListDetail }

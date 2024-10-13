@@ -619,7 +619,7 @@ app.post("/api/wy/songlist", async (req, res) => {
         })
 })
 
-app.get("/api/wy/songListAllMysic", async (req, res) => {
+app.post("/api/wy/songListAllMysic", async (req, res) => {
     let cookie = req.body.cookie;
     let id = req.query.id;
     playlist_track_all({
