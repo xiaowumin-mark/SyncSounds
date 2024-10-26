@@ -71,3 +71,4 @@ SyncSounds 是一个创新的音乐共享平台，旨在让用户能够与朋友
 ## 许可证
 
 SyncSounds 项目遵循 Apache 2.0 许可证。有关详细信息，请参阅 `LICENSE` 文件。
+
