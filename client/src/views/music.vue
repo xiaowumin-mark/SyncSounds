@@ -283,6 +283,7 @@ const loadSongListDetail = (id) => {
     margin-top: 20px;
 }
 
+
 .ctx .footer {
     width: 100%;
     height: calc(50% - 180px);

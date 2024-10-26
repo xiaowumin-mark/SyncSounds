@@ -36,6 +36,8 @@ function musicLyric(init, func, timeupdate, isPlay) {
 
     let audio = document.querySelector(init.audio) // 获取音频元素
     let lyric = document.querySelector(init.lyric)// 获取歌词容器
+    // 清空lyric
+    lyric.innerHTML = ""
     lyric.toggleAttribute(v) // 添加属性
     lyric.classList.add("ml-main")// 添加样式
     lyric.insertAdjacentHTML("afterbegin", `<div class="lyric"></div>`)// 添加歌词容器
