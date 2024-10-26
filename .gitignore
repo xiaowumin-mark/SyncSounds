@@ -9,6 +9,7 @@ lerna-debug.log*
 
 /server/node_modules
 /client/node_modules
+/client/public
 /server/static/music
 /server/static/ua
 
