@@ -97,7 +97,7 @@
   <!--  <img src="https://p1.music.126.net/4o8dGgZgouKRDQfl6Fp3dA==/109951169452179670.jpg?param=130y130"  :style="{viewTransitionName:'home1'}" alt="" srcset=""> -->
   <mdui-fab v-show="ID == 'h1'" style="position: fixed;bottom: 20px;right: 20px;z-index: 50;" icon="undo"
             @click="goback"></mdui-fab>
-  <audio src="/Maroon%205、Wiz%20Khalifa%20-%20Payphone.flac" ref="music" id="music"></audio>
+  <audio src="/172464432.mp3" ref="music" id="music"></audio>
 
   <mdui-navigation-drawer placement="right" modal close-on-esc close-on-overlay-click contained ref="more"
                           style="position: fixed;">
@@ -229,88 +229,74 @@ import AppleLyric from "@/assets/apple-lyric.js";
 import { setColorScheme } from 'mdui/functions/setColorScheme.js';
 
 
-const musicLyricText = `[00:00.000] Maroon 5 / Wiz Khalifa - Payphone
-[00:00.000] 作词 : Adam Levine/Benjamin Levin/Ammar Malik/Dan Omelio/Shellback/Cameron Thomaz
-[00:00.000] 作曲 : Adam Levine/Benjamin Levin/Ammar Malik/Dan Omelio/Shellback/Cameron Thomaz
-[00:00.000]作曲 : Adam Levine/Benjamin Levin/Ammar Malik/Dan Omelio/Shellback/Cameron Thomaz
-[00:00.360]作词 : Adam Levine/Benjamin Levin/Ammar Malik/Dan Omelio/Shellback/Cameron Thomaz
-[00:01.080]I'm at a payphone trying to call home
-[00:04.280]All of my change I spent on you
-[00:08.590]Where have the times gone
-[00:10.670]Baby it's all wrong, where are the plans we made for two?
-[00:17.540]Yeah, I, I know it's hard to remember
-[00:19.880]The people we used to be
-[00:23.130]It's even harder to picture
-[00:25.300]That you're not here next to me
-[00:27.520]You say it's too late to make it
-[00:29.890]But is it too late to try?
-[00:31.880]And in our time that you wasted
-[00:33.600]All of our bridges burned down
-[00:35.830]I've wasted my nights
-[00:37.960]You turned out the lights
-[00:40.970]Now I'm paralyzed
-[00:42.700]Still stuck in that time when we called it love
-[00:47.350]But even the sun sets in paradise
-[00:50.550]I'm at a payphone trying to call home
-[00:57.080]All of my change I spent on you
-[01:00.790]Where have the times gone
-[01:03.740]Baby it's all wrong, where are the plans we made for two?
-[01:09.400]If happy ever after did exist
-[01:11.130]I would still be holding you like this
-[01:18.330]All those fairytales are full of ****
-[01:22.540]One more ******* love song i'll be sick
-[01:25.530]You turned your back on tomorrow
-[01:30.730]Cause you forgot yesterday
-[01:31.700]I gave you my love to borrow
-[01:34.650]But you just gave it away
-[01:37.390]You can't expect me to be fine
-[01:39.730]I don't expect you to care
-[01:41.770]I know I've said it before
-[01:43.590]But all of our bridges burned down
-[01:45.780]I've wasted my nights
-[01:48.860]You turned out the lights
-[01:51.030]Now I'm paralyzed
-[01:53.270]Still stuck in that time when we called it love
-[01:57.380]But even the sun sets in paradise
-[02:00.170]I'm at a payphone trying to call home
-[02:06.670]All of my change I spent on you
-[02:10.580]Where have the times gone
-[02:12.860]Baby it's all wrong, where are the plans we made for two?
-[02:19.300]If happy ever after did exist
-[02:21.050]I would still be holding you like this
-[02:28.100]All those fairytales are full of *******t
-[02:32.470]One more ******* love song i'll be sick
-[02:36.720]Now I'm at a payphone...
-[02:39.160]Wiz Khalifa
-[02:39.470]Man **** that *******t
-[02:40.380]I'll be out spending all this money while you sitting round
-[02:42.230]Wondering why it wasn't you who came up from nothing
-[02:44.010]Made it from the bottom
-[02:45.020]Now when you see me I'm stunning
-[02:46.490]And all of my cars start with the push of a button
-[02:49.270]Telling me the chances since I blew up or whatever you call it
-[02:50.890]Switched the number to my phone
-[02:52.590]So you never could call it
-[02:53.700]Don't need my name on my show
-[02:55.680]You can tell it I'm ballin'
-[02:55.980]Swish, what a shame could have got picked
-[02:58.050]Had a really good game but you missed your last shot
-[02:59.890]So you talk about who you see at the top
-[03:02.670]Or what you could've saw
-[03:02.770]But sad to say it's over for
-[03:04.190]Phantom pulled up valet open doors
-[03:05.460]Wiz like go away, got what you was looking for
-[03:07.250]Now it's me who they want
-[03:09.820]So you can go and take that little piece of *******t with you
-[03:11.600]I'm at a payphone trying to call home
-[03:16.910]All of my change I spent on you
-[03:20.260]Where have the times gone
-[03:22.580]Baby it's all wrong, where are the plans we made for two?
-[03:28.950]If happy ever after did exist
-[03:33.510]I would still be holding you like this
-[03:37.990]All these fairytales are full of *******t
-[03:42.240]One more ******* love song i'll be sick
-[03:45.330]Now I'm at a Payphone`
+const musicLyricText = `[00:03.340]Oh woah
+[00:06.960]Oh woah
+[00:10.660]Oh woah
+[00:14.200]
+[00:15.120]You know you love me, I know you care
+[00:18.940]Just shout whenever, and I'll be there
+[00:22.670]You want my love, you want my heart
+[00:26.290]And we will never ever ever be apart
+[00:29.980]Are we an item? Girl quit playing
+[00:33.720]We're just friends, what are you saying
+[00:37.450]Said there's another and look right in my eyes
+[00:41.050]My first love broke my heart for the first time
+[00:44.440]And I was like
+[00:45.310]Baby, baby, baby, oh like
+[00:49.000]Baby, baby, baby, no like
+[00:52.660]Baby, baby, baby, oh
+[00:56.360]I thought you'd always been mine, mine
+[01:00.090]Baby, baby, baby, oh like
+[01:03.860]Baby, baby, baby, no like
+[01:07.480]Baby, baby, baby, oh
+[01:11.170]I thought you'd always been mine, mine
+[01:14.780]For you, I would have done whatever
+[01:18.230]And I just can't believe we ain't together
+[01:21.770]And I wanna play it cool, but I'm losing you
+[01:25.580]I'll buy you anything, I'll buy you any ring
+[01:28.990]And I'm in pieces, baby fix me
+[01:32.870]And you'll shake me till you wake me from this bad dream
+[01:36.370]
+[01:36.940]I'm going down, down, down, down
+[01:40.260]And I just can't believe my first love won't be around
+[01:43.920]And I'm now like
+[01:44.350]Baby, baby, baby, oh like
+[01:48.040]Baby, baby, baby, no like
+[01:51.760]Baby, baby, baby, oh
+[01:55.500]I thought you'd always been mine, mine
+[01:59.170]Baby, baby, baby, oh like
+[02:02.890]Baby, baby, baby, no like
+[02:06.540]Baby, baby, baby, oh
+[02:10.220]I thought you'd always been mine, mine
+[02:14.470]When I was 13 I had my first love
+[02:18.010]There was nobody that compared to my baby
+[02:19.420]And nobody came between us or could ever come above
+[02:21.540]She had me going crazy
+[02:23.680]Oh I was starstruck
+[02:25.450]She woke me up daily don't need no starbucks
+[02:29.250]She made my heart pound
+[02:30.920]Asking for a beat when I see her in the street
+[02:32.400]And at school on the playground
+[02:34.690]But I really wanna see her on the weekend
+[02:36.480]She knows she got me dazy
+[02:38.500]Cause she was so amazing
+[02:40.250]And now my heart is breaking
+[02:42.140]But I'll just keep on saying
+[02:43.730]Baby, baby, baby, oh like
+[02:47.150]Baby, baby, baby, no like
+[02:50.970]Baby, baby, baby, oh
+[02:54.550]I thought you'd always been mine, mine
+[02:58.360]Baby, baby, baby, oh like
+[03:02.050]Baby, baby, baby, no like
+[03:05.690]Baby, baby, baby, oh
+[03:09.010]
+[03:09.390]I thought you'd always been mine, mine
+[03:12.000]Now I'm all gone
+[03:15.730]Now I'm all gone
+[03:19.350]Now I'm all gone
+[03:23.010]Now I'm all gone
+[03:26.910]I am gone
+[03:28.360]`
 const bg_more = ref("rgba(255, 255, 255, 0.7)");
 const music_img = ref("/payphone.jpg")
 const password = ref('');
