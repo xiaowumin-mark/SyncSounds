@@ -298,7 +298,7 @@ const musicLyricText = `[00:03.340]Oh woah
 [03:26.910]I am gone
 [03:28.360]`
 const bg_more = ref("rgba(255, 255, 255, 0.7)");
-const music_img = ref("http://p2.music.126.net/S3Mkc-lfXPgsuUYxqVd4yQ==/710284511552973.jpg")
+const music_img = ref("/710284511552973.jpg")
 const password = ref('');
 const is_paused = ref(true);
 const all_time = ref(1.0);
