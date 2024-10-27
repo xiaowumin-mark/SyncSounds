@@ -458,9 +458,9 @@ const changeMusicLyricStyle = (mode) => {
     window.mul = new AppleLyric('#lrc', music.value, musicLyricText, {
       ifTrainsion: true, // 是否使用弹簧动画
       ifBlur: true, // 是否使用模糊效果
-      scale: 1.06, // 当前歌词的缩放比例
+      scale: 1.1, // 当前歌词的缩放比例
       fontSize: 30, // 歌词的字体大小
-      interval: 20, // 歌词的行间距
+      interval: 10, // 歌词的行间距
       ifInner: false, // 是否只在可见范围内播放动画，这样会减少卡顿，但是观感会差一些
       animationOffsetTime: 40 // 动画偏移时间，越小越平滑，但是不能超过 lyricSync.offsetH 否则会出问题
     });
@@ -734,10 +734,9 @@ async function getImageMainColorAndInvert(imageUrl) {
 
 .ctx .content .lyric {
   width: 100%;
-  overflow-y: auto;
   position: relative;
 
-  overflow-x: hidden;
+  overflow: hidden;
 
   &::-webkit-scrollbar {
     display: none;
