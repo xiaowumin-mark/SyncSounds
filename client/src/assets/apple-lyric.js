@@ -16,7 +16,7 @@ class AppleLyric {
         this.offsetH = 90;
         this.lastLrc = -1;
         this.style = style;
-        this.gFunc = ()=>{
+        this.gFunc = () => {
             this.updateLrc();
         }
         this.init();
@@ -28,6 +28,7 @@ class AppleLyric {
         this.lrcList = this.parseLrc(this.lyricsText);
         for (let i = 0; i < this.lrcList.length; i++) {
             this.lrcContainer.appendChild(this.lrcList[i].dom);
+
         }
         this.nextLrc(0, this.lrcList, true);
 
@@ -46,6 +47,7 @@ class AppleLyric {
     parseLrc(text) {
         let arr = text.split('\n');
         let res = [];
+
         for (let i = 0; i < arr.length; i++) {
             arr[i] = arr[i].substring(1);
             let arrTL = arr[i].split(']');
@@ -57,8 +59,16 @@ class AppleLyric {
             p.style.paddingBottom = this.style.interval + 'px';
             p.style.position = 'absolute';
             p.classList.add('apple_lyric_p');
+            const time = (Number(arrTime[0]) * 60 * 1000) + (Number(doTime[0]) * 1000) + Number(doTime[1]);
+            p.addEventListener('click', () => {
+                this.audio.currentTime = time / 1000;
+                this.lrcContainer.scroll({
+                    top: 0,
+                    behavior: 'smooth'
+                })
+            });
             res.push({
-                time: (Number(arrTime[0]) * 60 * 1000) + (Number(doTime[0]) * 1000) + Number(doTime[1]),
+                time: time,
                 lrc: arrTL[1],
                 index: i,
                 dom: p
@@ -121,12 +131,25 @@ class AppleLyric {
 
     getTopHeight(now, to, data) {
         let res = 0;
-        for (let i = now; i < to; i++) {
+        /*for (let i = now; i < to; i++) {
             res += data[i].dom.offsetHeight;
         }
         for (let i = now; i > to; i--) {
             res -= data[i].dom.offsetHeight;
+        }*/
+
+        // 判断滚动方向
+        if (to > now) { // 向下滚动
+            for (let i = now; i < to; i++) {
+                res += data[i].dom.offsetHeight + this.style.interval;
+            }
+        } else { // 向上滚动
+            for (let i = now; i > to; i--) {
+                res -= data[i - 1].dom.offsetHeight + this.style.interval;
+            }
         }
+
+        // 使用偏移值作为初始位置，确保歌词居中或位于正确位置
         return res + this.offsetH;
     }
 

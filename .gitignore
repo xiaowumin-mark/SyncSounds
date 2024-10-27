@@ -12,7 +12,6 @@ lerna-debug.log*
 /client/public
 /server/static/music
 /server/static/ua
-
 .DS_Store
 /client/dist
 dist-ssr

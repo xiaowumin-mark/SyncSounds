@@ -50,7 +50,7 @@
         </div>
       </div>
       <div class="content">
-        <div class="image" v-show="is_show_music_img">
+        <div class="image" v-show="is_show_music_img" :style="{transform:is_paused ? 'scale(1)':'scale(1.1)'}">
           <img :src="music_img"
                style="view-timeline-name: h2;" alt="" srcset="">
         </div>
@@ -226,6 +226,8 @@ import {snackbar} from "mdui/functions/snackbar.js";
 const ID = ref(router.currentRoute.value.params.id);
 import musicLyric from "@/assets/ml";
 import AppleLyric from "@/assets/apple-lyric.js";
+import { setColorScheme } from 'mdui/functions/setColorScheme.js';
+
 
 const musicLyricText = `[00:00.000] Maroon 5 / Wiz Khalifa - Payphone
 [00:00.000] 作词 : Adam Levine/Benjamin Levin/Ammar Malik/Dan Omelio/Shellback/Cameron Thomaz
@@ -321,6 +323,10 @@ const message_dia = ref(null);
 const is_show_music_img = ref(true);
 const is_show_music_lrc = ref(true);
 const lyricModeStyle = ref("al")
+const musicInfo = ref({
+  name: 'payphone',
+  singer: 'Maroon 5 , Wiz Khalifa',
+})
 watch(lyricModeStyle, (v) => {
   console.log("changeMusicLyricStyle")
 
@@ -356,6 +362,11 @@ const goback = () => {
 const music = ref(null);
 //const music = document.querySelector('audio');
 onMounted(() => {
+  getImageMainColorAndInvert(music_img.value).then((colors) => {
+    console.log("主题色:", colors.mainColor);
+    console.log("反色:", colors.invertedColor);
+    setColorScheme(colors.invertedColor);
+  });
   console.log(music.value);
   window.music = music.value;
   //当音频加载完成时触发
@@ -365,13 +376,13 @@ onMounted(() => {
 
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: '藏',
-        artist: '徐梦圆',
-        album: '藏-徐梦圆',
+        title: musicInfo.value.name,
+        artist: musicInfo.value.singer,
+        album: musicInfo.value.singer,
         artwork: [
           {
-            src: 'https://p1.music.126.net/9cySfhHshoKksSkAxwVVqw==/109951163175751210.jpg',
-            sizes: '96x96',
+            src: music_img.value,
+            sizes: '1280x1280',
             type: 'image/jpeg'
           },
         ]
@@ -447,9 +458,9 @@ const changeMusicLyricStyle = (mode) => {
     window.mul = new AppleLyric('#lrc', music.value, musicLyricText, {
       ifTrainsion: true, // 是否使用弹簧动画
       ifBlur: true, // 是否使用模糊效果
-      scale: 1.1, // 当前歌词的缩放比例
-      fontSize: 40, // 歌词的字体大小
-      interval: 30, // 歌词的行间距
+      scale: 1.06, // 当前歌词的缩放比例
+      fontSize: 30, // 歌词的字体大小
+      interval: 20, // 歌词的行间距
       ifInner: false, // 是否只在可见范围内播放动画，这样会减少卡顿，但是观感会差一些
       animationOffsetTime: 40 // 动画偏移时间，越小越平滑，但是不能超过 lyricSync.offsetH 否则会出问题
     });
@@ -495,6 +506,71 @@ window.addEventListener('resize', cancalDebounce);
 onUnmounted(() => {
   window.removeEventListener('resize', cancalDebounce);
 })
+
+async function getImageMainColorAndInvert(imageUrl) {
+  // 获取图像 Blob 数据
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+
+  // 创建新的 Image 对象
+  const image = new Image();
+  image.src = URL.createObjectURL(blob);
+
+  return new Promise((resolve) => {
+    image.onload = function () {
+      // 创建 canvas 元素
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      // 设置 canvas 尺寸
+      canvas.width = image.width;
+      canvas.height = image.height;
+
+      // 将图像绘制到 canvas 上
+      context.drawImage(image, 0, 0, image.width, image.height);
+
+      // 获取图像的像素数据
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      // 初始化 RGB 累加值
+      let r = 0, g = 0, b = 0, count = 0;
+
+      // 遍历像素数据并计算平均颜色
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+        count++;
+      }
+
+      // 计算平均颜色
+      r = Math.floor(r / count);
+      g = Math.floor(g / count);
+      b = Math.floor(b / count);
+
+      // 计算反色
+      const invertedColor = {
+        r: 255 - r,
+        g: 255 - g,
+        b: 255 - b
+      };
+
+      // 将反色转换为 hex 格式
+      const invertedHex = `#${((1 << 24) | (invertedColor.r << 16) | (invertedColor.g << 8) | invertedColor.b).toString(16).slice(1)}`;
+
+      resolve({
+        mainColor: `rgb(${r}, ${g}, ${b})`,
+        invertedColor: invertedHex
+      });
+
+      // 释放 URL 对象
+      URL.revokeObjectURL(image.src);
+    };
+  });
+}
+
+
 </script>
 
 <style scoped>
@@ -638,7 +714,7 @@ onUnmounted(() => {
   height: calc(40vh - 50px);
   display: flex;
   justify-content: center;
-
+  transition: all 0.5s;
 }
 
 .ctx .content .image img {
@@ -855,9 +931,20 @@ onUnmounted(() => {
   box-sizing: border-box;
   padding-bottom: 20px;
   color: rgba(255, 255, 255, .25);
-  transition: color 0.5s, top 0.6s, transform 0.5s;
+  transition: all 0.5s;
   font-weight: 700;
+
+  border-radius: 12px;
   transform-origin: left center;
   text-align: left;
+}
+
+.apple_lyric_p:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.apple_lyric_p:active {
+  transform: scale(0.95);
+  transition: transform 0.1s;
 }
 </style>
