@@ -44,7 +44,9 @@ app.post("/api/user/register", async (req, res) => {
         res.json({
             code: 200,
             msg: "注册成功",
-            data: null,
+            data: {
+                id: user.id,
+            },
             token: generateToken(user.id)
         })
     }
@@ -63,7 +65,7 @@ app.post("/api/user/login", async (req, res) => {
     try {
         let user = await User.findOne({
             where: {
-                username: d.username,
+                email: d.email,
             }
         })
         if (user) {
@@ -144,16 +146,9 @@ app.post("/api/user/upload", (req, res) => {
 
 });
 
-app.get("/api/user/info", async (req, res) => {
+app.post("/api/user/info", async (req, res) => {
 
-    verifyToken(req.body.token).then(async tokendata => {
-        let userid = tokendata.userId;
-        // 在user表中查询
-        let user = await User.findOne({
-            where: {
-                id: userid
-            }
-        });
+    verifyToken(req.body.token).then(async user => {
         res.json({
             code: 200,
             msg: "查询成功",

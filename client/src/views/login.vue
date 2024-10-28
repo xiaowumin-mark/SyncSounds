@@ -8,30 +8,32 @@
         <mdui-tab value="注册" @click="height = '550px';Tmode='注册'">注册</mdui-tab>
 
         <mdui-tab-panel slot="panel" value="登录" style="padding: 20px;">
-          <mdui-text-field aria-autocomplete="none" variant="outlined" label="请输入邮箱" :valu="login.email" @input="login.email = $event.target.value">
+          <mdui-text-field autocomplete="off" variant="outlined" label="请输入邮箱" :valu="login.email"
+                           @input="login.email = $event.target.value">
             <span v-show="loText.email != ''" slot="helper" style="color: red">{{ loText.email }}</span>
-            </mdui-text-field>
-          <mdui-text-field aria-autocomplete="none" variant="outlined" label="请输入密码" :valu="login.password" @input="login.password = $event.target.value"
+          </mdui-text-field>
+          <mdui-text-field autocomplete="off" variant="outlined" label="请输入密码" :valu="login.password"
+                           @input="login.password = $event.target.value"
                            style="margin-top: 25px;margin-bottom: 25px;" type="password">
             <span v-show="loText.password != ''" slot="helper" style="color: red">{{ loText.password }}</span>
           </mdui-text-field>
           <mdui-button variant="elevated" @click="h">登录</mdui-button>
         </mdui-tab-panel>
         <mdui-tab-panel slot="panel" value="注册" style="padding: 20px;">
-          <mdui-text-field aria-autocomplete="none" variant="outlined" label="用户名" :value="register.username"
+          <mdui-text-field autocomplete="off" variant="outlined" label="用户名" :value="register.username"
                            @input="register.username = $event.target.value">
             <span v-show="reText.username != ''" slot="helper" style="color: red">{{ reText.username }}</span>
           </mdui-text-field>
-          <mdui-text-field aria-autocomplete="none" variant="outlined" label="邮箱" :value="register.email"
+          <mdui-text-field autocomplete="off" variant="outlined" label="邮箱" :value="register.email"
                            @input="register.email = $event.target.value" style="margin-top: 25px;">
             <span v-show="reText.email != ''" slot="helper" style="color: red">{{ reText.email }}</span>
           </mdui-text-field>
-          <mdui-text-field aria-autocomplete="none" variant="outlined" label="介绍" :value="register.introduction"
+          <mdui-text-field autocomplete="off" variant="outlined" label="介绍" :value="register.introduction"
                            @input="register.introduction = $event.target.value" maxlength="50" counter
                            style="margin-top: 25px;">
             <span v-show="reText.introduction != ''" slot="helper" style="color: red">{{ reText.introduction }}</span>
           </mdui-text-field>
-          <mdui-text-field aria-autocomplete="none" variant="outlined" label="密码" :value="register.password"
+          <mdui-text-field autocomplete="off" variant="outlined" label="密码" :value="register.password"
                            @input="register.password = $event.target.value" style="margin-top: 10px;"
                            type="password">
             <span v-show="reText.password != ''" slot="helper" style="color: red">{{ reText.password }}</span>
@@ -47,6 +49,7 @@
 <script setup>
 import {ref, watch} from "vue";
 import router from "@/router";
+import {snackbar} from "mdui/functions/snackbar.js";
 
 const Tmode = ref("登录");
 const height = ref("360px");
@@ -147,6 +150,28 @@ const h = () => {
       isPass = true;
     }
     if (!isPass) return;
+
+    fetch(host + "/api/user/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json;charset=utf-8",
+      },
+      body: JSON.stringify(login.value),
+    }).then((res) => {
+      return res.json();
+    }).then((data) => {
+      console.log(data)
+      if (data.code === 200) {
+        localStorage.setItem("sync_token", data.token);
+        localStorage.setItem("sync_user", data.data.id);
+        router.push("/me");
+      } else {
+        snackbar({message: data.msg});
+      }
+    }).catch((err) => {
+      console.log(err);
+      snackbar({message: "网络错误"});
+    })
   } else {
     let isPass = false;
     if (register.value.username.length === 0) {
@@ -200,7 +225,36 @@ const h = () => {
       isPass = true;
     }
     if (!isPass) return;
+    fetch(host + "/api/user/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json;charset=utf-8",
+      },
+      body: JSON.stringify(register.value),
+    }).then((res) => {
+      return res.json();
+    }).then((data) => {
+      console.log(data);
+      if (data.code === 200) {
+        localStorage.setItem("sync_token", data.token);
+        localStorage.setItem("sync_user", data.data.id);
+        pass()
+      } else {
+        snackbar({
+          message: "注册失败",
+        });
+      }
+    }).catch((err) => {
+      console.log(err);
+      snackbar({
+        message: "注册失败",
+      });
+    });
   }
+
+};
+
+function pass() {
   cls.value = "crd";
   setTimeout(() => {
     if (document.startViewTransition) {
@@ -211,7 +265,7 @@ const h = () => {
       router.push("/me");
     }
   }, 300);
-};
+}
 
 function validateEmail(email) {
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

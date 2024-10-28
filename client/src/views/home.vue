@@ -20,7 +20,7 @@ const TSNpush = (path) => {
 import {dialog} from "mdui/functions/dialog.js";
 
 
-dialog({
+/*dialog({
   headline: "SyncSounds",
   description: "这是一个预览版，仅为前端页面，由xiaowumin开发。\n \n https://github.com/xiaowumin-mark/SyncSounds",
   actions: [
@@ -28,7 +28,7 @@ dialog({
       text: "确定"
     }
   ]
-});
+});*/
 
 </script>
 

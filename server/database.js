@@ -33,7 +33,7 @@ const User = sequelize.define('user', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    intronduction: {
+    introduction: {
         type: DataTypes.STRING,
         allowNull: true
     },
