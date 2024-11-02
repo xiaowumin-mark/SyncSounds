@@ -1,18 +1,19 @@
-const { sequelize, User, Rooms, Songs } = require('./database.js');
+const {sequelize, User, Rooms, Songs} = require('./database.js');
 const config = require('./config.js');
 const http = require('http');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const { Password, ComparePassword } = require('./crypto.js');
+const {Password, ComparePassword} = require('./crypto.js');
 const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
-const { generateToken, verifyToken } = require('./jwt.js');
-const { v4: uuid } = require('uuid');
+const upload = multer({storage: storage})
+const {generateToken, verifyToken} = require('./jwt.js');
+const {v4: uuid} = require('uuid');
 const fs = require('fs');
 const mtpy = require('multiparty');
-const { search,
+const {
+    search,
     song_detail,
     lyric,
     song_download_url,
@@ -25,7 +26,7 @@ const axios = require('axios');
 let app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 app.use("/static", express.static(path.join(__dirname, 'static')));
 let server = http.createServer(app);
 let io = require('socket.io')(server);
@@ -49,8 +50,7 @@ app.post("/api/user/register", async (req, res) => {
             },
             token: generateToken(user.id)
         })
-    }
-    catch (e) {
+    } catch (e) {
         console.log(e);
         res.json({
             code: 500,
@@ -76,8 +76,7 @@ app.post("/api/user/login", async (req, res) => {
                     data: user,
                     token: generateToken(user.id),
                 })
-            }
-            else {
+            } else {
                 res.json({
                     code: 500,
                     msg: "密码错误",
@@ -85,8 +84,7 @@ app.post("/api/user/login", async (req, res) => {
                 })
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         res.json({
             code: 500,
             msg: "登录失败",
@@ -116,8 +114,7 @@ app.post("/api/user/upload", (req, res) => {
                     msg: "查询成功",
                     data: user
                 })
-            }
-            catch (e) {
+            } catch (e) {
                 res.json({
                     code: 500,
                     msg: "用户不存在",
@@ -133,13 +130,11 @@ app.post("/api/user/upload", (req, res) => {
         });
 
 
-
         /* res.json({
             code: 200,
             msg: "上传成功",
             data: null
         }) */
-
 
 
     })
@@ -163,7 +158,6 @@ app.post("/api/user/info", async (req, res) => {
     });
 
 
-
 })
 
 app.get("/api/user/info/:id", async (req, res) => {
@@ -185,8 +179,7 @@ app.get("/api/user/info/:id", async (req, res) => {
                 id: user.id
             }
         })
-    }
-    catch (e) {
+    } catch (e) {
         res.json({
             code: 500,
             msg: "查询失败",
@@ -254,8 +247,6 @@ app.post("/api/song/addData", async (req, res) => {
                 })
                 return
             }
-
-
 
 
             // 判断是否已经存在
@@ -388,8 +379,6 @@ app.post("/api/song/addMoreMusic", (req, res) => {
                                         } */
 
 
-
-
                     // 判断是否已经存在
                     let song_exist = await Songs.findOne({
                         where: {
@@ -445,8 +434,7 @@ app.post("/api/song/addMoreMusic", (req, res) => {
                         data: null
                     })
                 });
-            }
-            catch (e) {
+            } catch (e) {
                 res.json({
                     code: 500,
                     msg: "用户不存在",
@@ -462,13 +450,11 @@ app.post("/api/song/addMoreMusic", (req, res) => {
         });
 
 
-
         /* res.json({
             code: 200,
             msg: "上传成功",
             data: null
         }) */
-
 
 
     })
@@ -494,7 +480,39 @@ app.get("/api/song", async (req, res) => {
     });
 })
 
+app.get("/api/room/info/:id", async (req, res) => {
+    let id = req.params.id;
+    Rooms.findOne({
+        where: {
+            id: id
+        },
+    }).then(d => {
+        res.json({
+            code: 200,
+            msg: "获取成功",
+            data: d
+        })
+    }).catch(e => {
+        res.json({
+            code: 500,
+            msg: "该房间不存在",
+            data: null
+        })
+    });
+})
 
+app.get("/api/room", async (req, res) => {
+    let rooms = await Rooms.findAll({
+        where: {
+            is_public: 1
+        }
+    });
+    res.json({
+        code: 200,
+        msg: "获取成功",
+        data: rooms
+    })
+})
 
 app.post("/api/room/new", async (req, res) => {
     // name,instruction,allow_peeople_num,ispublic,password,songs
@@ -517,8 +535,7 @@ app.post("/api/room/new", async (req, res) => {
                 msg: "创建成功",
                 data: room
             })
-        }
-        catch (e) {
+        } catch (e) {
             res.json({
                 code: 500,
                 msg: "创建失败",
@@ -598,20 +615,20 @@ app.post("/api/wy/songlist", async (req, res) => {
             cookie: cookie,
             uid: uid
         }).then(data => {
-            res.json({
-                code: 200,
-                msg: "获取成功",
-                data: data.body
-            })
-
-        }).catch(err => {
-            console.log(err);
-            res.json({
-                code: 500,
-                msg: "获取失败",
-                data: null
-            })
+        res.json({
+            code: 200,
+            msg: "获取成功",
+            data: data.body
         })
+
+    }).catch(err => {
+        console.log(err);
+        res.json({
+            code: 500,
+            msg: "获取失败",
+            data: null
+        })
+    })
 })
 
 app.post("/api/wy/songListAllMysic", async (req, res) => {
@@ -637,8 +654,10 @@ app.post("/api/wy/songListAllMysic", async (req, res) => {
 
 })
 
+let allPeople = 0
 //有新的客户端连接时触发
 io.on('connection', function (socket) {
+    allPeople++;
     //接收到消息时触发
     socket.on('message', function (data) {
         console.log('服务端收到 : ', data);
@@ -650,6 +669,82 @@ io.on('connection', function (socket) {
     socket.on('error', function (err) {
         console.log(err);
     });
+});
+
+io.on("disconnect", function () {
+    allPeople--;
+})
+
+const chatSpace = io.of("/chat");
+chatSpace.on("connection", function (socket) {
+    socket.on("join", (data) => {
+        verifyToken(data.token).then(async user => {
+            Rooms.findOne({
+                where: {
+                    id: data.roomId,
+                }
+            }).then(udata => {
+                if ((udata.peoples_num + 1) > udata.allow_peoples_num) {
+
+                    chatSpace.emit("error", {
+                        code: 500,
+                        msg: "房间已满",
+                    })
+                    return
+                }
+                if (!udata.is_public && !ComparePassword(data.password, udata.password)) {
+                    socket.emit("error", {
+                        code: 500,
+                        msg: "密码错误",
+                    });
+                    return;
+                }
+
+                let peoples = JSON.parse(udata.peoples);
+                // 如果id在peoples中，则直接加入
+                if (peoples.indexOf(user.id) > -1) {
+                    chatSpace.emit("error", {
+                        code: 500,
+                        msg: "已加入房间",
+                    })
+                    return
+                }
+                peoples.push(user.id);
+                // 更新peoples
+                udata.update({
+                    peoples: JSON.stringify(peoples),
+                    peoples_num: udata.peoples_num + 1,
+                });
+                user.update({
+                    in_room: data.roomId
+                });
+                chatSpace.join(data.roomId);
+                // 给除了自己之外的所有用户发送加入房间的消息
+                chatSpace.to(data.roomId).emit("join", {
+                    code: 200,
+                    msg: data.username + " 加入房间",
+                    data: {
+                        peoples: peoples,
+                        peoples_num: udata.peoples_num,
+                        user: {
+                            name: user.username,
+                            avatar: user.avatar,
+                            id: user.id,
+                            is_admin: user.is_admin,
+                            email: user.email,
+                            introduction: user.introduction,
+                        }
+                    }
+                })
+            })
+
+        }).catch(err => {
+            socket.emit("error", {
+                code: 500,
+                msg: "token错误",
+            })
+        })
+    })
 });
 
 server.listen(config.redis.port);
@@ -669,7 +764,7 @@ const downloadFile = async (url, destination, callback) => {
         url: url,
         responseType: 'stream', // 将响应类型设置为流
         onDownloadProgress: (progressEvent) => {
-            const { loaded, total } = progressEvent;
+            const {loaded, total} = progressEvent;
             const percentage = Math.floor((loaded * 100) / total); // 计算下载百分比
             if (callback) {
                 callback(percentage);

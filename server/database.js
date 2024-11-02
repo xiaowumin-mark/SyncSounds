@@ -90,20 +90,20 @@ const Rooms = sequelize.define('rooms', {
         allowNull: true,
         defaultValue: 0
     },
-    room_id: {
+    /*room_id: {
         type: DataTypes.STRING,
         allowNull: true
-    },
+    },*/
     intronduction: {
         type: DataTypes.STRING,
         allowNull: true
     },
     songs: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('long'),
         allowNull: true
     },
     messages: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('long'),
         allowNull: true
     },
     image: {
@@ -115,7 +115,11 @@ const Rooms = sequelize.define('rooms', {
         allowNull: true
     },
     admin: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('long'),
+        allowNull: true
+    },
+    peoples: {
+        type: DataTypes.TEXT('long'),
         allowNull: true
     },
 }, {

@@ -4,7 +4,7 @@ import '@mdui/icons/library-music.js';
 import '@mdui/icons/date-range.js';
 import router from '@/router';
 import {ref} from 'vue';
-
+import T from '@/assets/tools.js'
 const join = ref(null)
 const my_drawer = ref(null)
 const TSNpush = (path) => {
@@ -17,7 +17,15 @@ const TSNpush = (path) => {
   }
 };
 
-import {dialog} from "mdui/functions/dialog.js";
+const roomList = ref([]);
+fetch(host + '/api/room')
+    .then(res => res.json())
+    .then(data => {
+      roomList.value = data.data
+    })
+    .catch(err => console.log(err));
+
+//import {dialog} from "mdui/functions/dialog.js";
 
 
 /*dialog({
@@ -39,32 +47,32 @@ import {dialog} from "mdui/functions/dialog.js";
   </mdui-top-app-bar>
   <div style="padding: 10px;height: calc(100% - 64px);overflow-y: auto;" class="scrollbar">
 
-    <mdui-card clickable class="card" v-for="i in 5" @click="TSNpush('/music/h' + i)">
-      <img src="https://p1.music.126.net/4o8dGgZgouKRDQfl6Fp3dA==/109951169452179670.jpg?param=130y130" alt="">
+    <mdui-card clickable class="card" v-for="i in roomList" @click="TSNpush('/music/' + i.id)" :key="i.id">
+      <img :src="i.image ?  i.image:'/ss128x128.png'" alt="">
       <div class="top">
-        <p class="title">正在播放: 时代少年团 我们喜欢你</p>
+        <p class="title">{{ i.name}}</p>
         <p class="introduction scrollbar">
-          时代少年団，我们喜欢你，我们喜欢马嘉祺丁程鑫宋亚轩，时代少年団
+          {{i.intronduction}}
         </p>
       </div>
       <div class="buttom">
         <div style="width: 85px;height: 40px;display: flex;justify-content: start;align-items: center;">
-          <div style="width: 40px;height: 40px;display: flex;justify-content: center;align-items: center;">
+          <div style="width: auto;height: 40px;display: flex;justify-content: center;align-items: center;">
             <mdui-icon-date-range style="width: 20px;"></mdui-icon-date-range>
           </div>
-          <span style="font-size: 13px;">五天前</span>
+          <span style="font-size: 13px;">{{T.Time(i.createdAt)}}</span>
         </div>
         <div style="width: 60px;height: 40px;display: flex;justify-content: start;align-items: center;">
           <div style="width: 40px;height: 40px;display: flex;justify-content: center;align-items: center;">
             <mdui-icon-library-music style="width: 20px;"></mdui-icon-library-music>
           </div>
-          <span style="font-size: 13px;">15</span>
+          <span style="font-size: 13px;">{{JSON.parse(i.songs).length}}</span>
         </div>
         <div style="width: 60px;height: 40px;display: flex;justify-content: start;align-items: center;">
           <div style="width: 40px;height: 40px;display: flex;justify-content: center;align-items: center;">
             <mdui-icon-people style="width: 20px;"></mdui-icon-people>
           </div>
-          <span style="font-size: 13px;">15</span>
+          <span style="font-size: 13px;">{{i.peoples_num}}</span>
         </div>
       </div>
     </mdui-card>
