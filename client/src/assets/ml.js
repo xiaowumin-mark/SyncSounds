@@ -222,7 +222,7 @@ function musicLyric(init, func, timeupdate, isPlay) {
         let set = eleHeight - mainHeight
 
 
-        lyric.style.marginTop = `${-set}px`
+        lyric.style.marginTop = `${-set - 40}px`
 
     }
 

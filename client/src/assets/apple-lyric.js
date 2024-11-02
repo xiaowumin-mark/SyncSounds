@@ -8,7 +8,7 @@ class AppleLyric {
         ifInner: false,
         animateionOffsetTime: 5
 
-    }) {
+    }, func) {
         this.lrcContainer = document.querySelector(lrcContainerSelector);
         this.audio = audioDom;
         this.lyricsText = lyricsText;
@@ -19,6 +19,7 @@ class AppleLyric {
         this.gFunc = () => {
             this.updateLrc();
         }
+        this.func = func;
         this.init();
 
     }
@@ -129,6 +130,7 @@ class AppleLyric {
         }
     }
 
+
     getTopHeight(now, to, data) {
         let res = 0;
         /*for (let i = now; i < to; i++) {
@@ -167,6 +169,7 @@ class AppleLyric {
         if (this.lastLrc !== lList[lList.length - 1].index) {
             this.nextLrc(lList[lList.length - 1].index, this.lrcList);
             this.lastLrc = lList[lList.length - 1].index;
+            if (this.func) this.func(lList[lList.length - 1].index, lList[lList.length - 1].lrc);
         }
     }
 

@@ -20,7 +20,7 @@
 
   </div>
 
-  <div class="app" v-show="ID != 'h1'">
+  <div class="app" v-show="ID != 'h1'" :style="{'--ss-online-mdui-btn-color' : mdui_btn_color}">
     <img :src="music_img" alt="" class="img">
     <div class="bg_more" :style="{'--ss-online-bg-more':bg_more}"></div>
     <div class="ctx">
@@ -30,9 +30,9 @@
 
         </div>
         <div class="title">
-          <p style="font-weight: 700;font-size: 17px;">藏</p>
+          <p style="font-weight: 700;font-size: 17px;">{{ musicInfo.name }}</p>
           <p style="margin-top: -13px;opacity: 0.7;font-size: 15px">
-            徐梦圆
+            {{ musicInfo.singer }}
           </p>
         </div>
         <div class="more">
@@ -62,6 +62,10 @@
         </div>
       </div>
       <div class="footer">
+        <div class="image" :style="{transform:is_paused ? 'scale(1)':'scale(1.1)'}">
+          <img :src="music_img"
+               style="view-timeline-name: h2;" alt="" srcset="">
+        </div>
         <div class="btns">
           <div class="item">
             <mdui-button-icon icon="list"></mdui-button-icon>
@@ -77,8 +81,8 @@
           </div>
         </div>
         <div class="progress">
-          <mdui-slider nolabel :max="all_time" step="0.001" :value="now_time" @mousedown="music.pause()"
-                       @mouseup="music.play()" @input="music.currentTime = $event.target.value"></mdui-slider>
+          <mdui-slider nolabel :max="all_time" step="0.001" :value="now_time"
+                       @input="music.currentTime = $event.target.value"></mdui-slider>
         </div>
         <div class="control">
           <div class="left">
@@ -97,7 +101,7 @@
   <!--  <img src="https://p1.music.126.net/4o8dGgZgouKRDQfl6Fp3dA==/109951169452179670.jpg?param=130y130"  :style="{viewTransitionName:'home1'}" alt="" srcset=""> -->
   <mdui-fab v-show="ID == 'h1'" style="position: fixed;bottom: 20px;right: 20px;z-index: 50;" icon="undo"
             @click="goback"></mdui-fab>
-  <audio src="/172464432.mp3" ref="music" id="music"></audio>
+  <audio src="/lsm.m4a" ref="music" id="music"></audio>
 
   <mdui-navigation-drawer placement="right" modal close-on-esc close-on-overlay-click contained ref="more"
                           style="position: fixed;">
@@ -226,79 +230,109 @@ import {snackbar} from "mdui/functions/snackbar.js";
 const ID = ref(router.currentRoute.value.params.id);
 import musicLyric from "@/assets/ml";
 import AppleLyric from "@/assets/apple-lyric.js";
-import { setColorScheme } from 'mdui/functions/setColorScheme.js';
+import {setColorScheme} from 'mdui/functions/setColorScheme.js';
 
 
-const musicLyricText = `[00:03.340]Oh woah
-[00:06.960]Oh woah
-[00:10.660]Oh woah
-[00:14.200]
-[00:15.120]You know you love me, I know you care
-[00:18.940]Just shout whenever, and I'll be there
-[00:22.670]You want my love, you want my heart
-[00:26.290]And we will never ever ever be apart
-[00:29.980]Are we an item? Girl quit playing
-[00:33.720]We're just friends, what are you saying
-[00:37.450]Said there's another and look right in my eyes
-[00:41.050]My first love broke my heart for the first time
-[00:44.440]And I was like
-[00:45.310]Baby, baby, baby, oh like
-[00:49.000]Baby, baby, baby, no like
-[00:52.660]Baby, baby, baby, oh
-[00:56.360]I thought you'd always been mine, mine
-[01:00.090]Baby, baby, baby, oh like
-[01:03.860]Baby, baby, baby, no like
-[01:07.480]Baby, baby, baby, oh
-[01:11.170]I thought you'd always been mine, mine
-[01:14.780]For you, I would have done whatever
-[01:18.230]And I just can't believe we ain't together
-[01:21.770]And I wanna play it cool, but I'm losing you
-[01:25.580]I'll buy you anything, I'll buy you any ring
-[01:28.990]And I'm in pieces, baby fix me
-[01:32.870]And you'll shake me till you wake me from this bad dream
-[01:36.370]
-[01:36.940]I'm going down, down, down, down
-[01:40.260]And I just can't believe my first love won't be around
-[01:43.920]And I'm now like
-[01:44.350]Baby, baby, baby, oh like
-[01:48.040]Baby, baby, baby, no like
-[01:51.760]Baby, baby, baby, oh
-[01:55.500]I thought you'd always been mine, mine
-[01:59.170]Baby, baby, baby, oh like
-[02:02.890]Baby, baby, baby, no like
-[02:06.540]Baby, baby, baby, oh
-[02:10.220]I thought you'd always been mine, mine
-[02:14.470]When I was 13 I had my first love
-[02:18.010]There was nobody that compared to my baby
-[02:19.420]And nobody came between us or could ever come above
-[02:21.540]She had me going crazy
-[02:23.680]Oh I was starstruck
-[02:25.450]She woke me up daily don't need no starbucks
-[02:29.250]She made my heart pound
-[02:30.920]Asking for a beat when I see her in the street
-[02:32.400]And at school on the playground
-[02:34.690]But I really wanna see her on the weekend
-[02:36.480]She knows she got me dazy
-[02:38.500]Cause she was so amazing
-[02:40.250]And now my heart is breaking
-[02:42.140]But I'll just keep on saying
-[02:43.730]Baby, baby, baby, oh like
-[02:47.150]Baby, baby, baby, no like
-[02:50.970]Baby, baby, baby, oh
-[02:54.550]I thought you'd always been mine, mine
-[02:58.360]Baby, baby, baby, oh like
-[03:02.050]Baby, baby, baby, no like
-[03:05.690]Baby, baby, baby, oh
-[03:09.010]
-[03:09.390]I thought you'd always been mine, mine
-[03:12.000]Now I'm all gone
-[03:15.730]Now I'm all gone
-[03:19.350]Now I'm all gone
-[03:23.010]Now I'm all gone
-[03:26.910]I am gone
-[03:28.360]`
+const musicLyricText = `[00:00.00] 作词 : 梨冻紧/Wiz_H张子豪
+[00:01.00] 作曲 : 梨冻紧/Wiz_H张子豪
+[00:02.00] 编曲 : Wiz_H张子豪
+[00:03.00] 钢琴 : 梨冻紧
+[00:04.00] 封面 : 蓝明初
+[00:05.00] 混音 : 官硕
+[00:06.00] 母带 : Mai＂ No Label Crew＂
+[00:07.00] 监制 : Mai＂ No Label Crew＂
+[00:08.00] 发行 : No Label Crew
+[00:09.00] 企划 : 苏文嫒 张琛
+[00:30.60]我没转身
+[00:31.71]一直走一直梦
+[00:33.69]一直疯一直没停留
+[00:37.83]那些美好的
+[00:39.27]越靠近越沉溺
+[00:41.22]越来越不想放手
+[00:45.99] Wherever you go
+[00:53.13] Wherever you go
+[01:01.26] Follow
+[01:02.04]每到晚上理智变得感性
+[01:04.44]我编了这条短信
+[01:05.67]说不在乎不过是我嘴硬
+[01:07.65]总是期待你有什么反应
+[01:09.48]对你没法保持那份冷静
+[01:11.22]偷偷想着我们之间关系的远近
+[01:13.23]我的心里没有任何的侥幸
+[01:14.85]我知道我的爱对你来说就好像软禁
+[01:16.74]我们都闭口不提
+[01:18.42]这跨不过的距离
+[01:20.04]我们不停的一再复习着
+[01:22.02]那些感情里俗套的剧情
+[01:23.76]你那里是怎么样的天气
+[01:25.74]夜空是否还是那么透明
+[01:27.51]我说的又开始不着了边际
+[01:29.52]可是没有你我真的不行
+[01:31.14]就请你
+[01:32.19]把我当成贪得无厌
+[01:34.11]把我当作得寸进尺
+[01:35.79]每当难过表情在你脸上浮现
+[01:37.65]我也难过得像照着一面镜子
+[01:39.51]多么希望和你在一起的时间
+[01:41.46]那些快乐可以突然静止
+[01:43.26]多么希望时间可以快点
+[01:44.97]带我和你一起体验生老和病死
+[01:46.77]我想过下次会更好
+[01:48.15]也开始更加了解了你的脾气
+[01:50.31]可是下次我们还是争吵
+[01:52.02]下次可能还是不留余地
+[01:54.00]我爱你不遗余力
+[01:55.59]在爱里不停期待奇迹
+[01:57.57]不忍看你这么痛苦
+[01:59.25]又不愿离去
+[02:00.69] and i will
+[02:01.29] Follow
+[02:01.83]一直走一直梦
+[02:03.66]一直疯一直没停留
+[02:07.83]那些美好的
+[02:09.27]越靠近越沉溺
+[02:11.19]越来越不想放手
+[02:15.60] Wherever you go
+[02:23.13] Wherever you go
+[02:32.61] Wherever you go
+[02:34.44] Wherever you go
+[02:36.48]一直都搞不定自己的情绪在你走后
+[02:40.05] Wherever you go
+[02:41.88] just want you to know
+[02:43.95]你知道我的心一直都在原地为你等候
+[02:46.65]其实对天气不感兴趣
+[02:48.15]想知道你会不会太冷
+[02:50.28]没法完成那份陪伴
+[02:51.78]孤独你会不会在忍
+[02:53.79]不知道想念你的痛苦
+[02:55.50]来的到底会不会太准
+[02:57.36]只知道当你不在床上
+[02:59.25]我总是睡得不会太稳
+[03:01.53]我们看惯了世间的罗生门
+[03:03.45]变得好像陌生人
+[03:05.28]两颗同样不安的心脏被塞进了同一个摩天轮
+[03:09.03]每次拥抱停留在清晨
+[03:10.98]窗外大雨在倾盆
+[03:12.75]我们好像巨大城市里面两个相爱的外星人
+[03:16.53]可我不想生活在套路里
+[03:18.45]想把心事都告诉你
+[03:19.86]我想要一直照顾你
+[03:21.72]又总害怕你耗不起
+[03:24.54]滴答的秒针又在
+[03:26.16]提醒我爱你几分
+[03:28.23]只要听到你的声音
+[03:29.73]我一定会为你转身
+[03:31.74]一直走一直梦
+[03:33.66]一直疯一直没停留
+[03:37.86]那些美好的
+[03:39.27]越靠近越沉溺
+[03:41.22]越来越不想放手
+[03:45.66] Wherever you go
+[03:46.89] Wherever you go
+[03:51.12]营销推广：贾皓然 欧阳慧琳 苏文嫒
+[03:58.83]本歌曲来自【青云 LAB】`
 const bg_more = ref("rgba(255, 255, 255, 0.7)");
-const music_img = ref("/710284511552973.jpg")
+const music_img = ref("http://p1.music.126.net/yN1ke1xYMJ718FiHaDWtYQ==/109951165076380471.jpg?param=130y130")
 const password = ref('');
 const is_paused = ref(true);
 const all_time = ref(1.0);
@@ -309,14 +343,19 @@ const message_dia = ref(null);
 const is_show_music_img = ref(true);
 const is_show_music_lrc = ref(true);
 const lyricModeStyle = ref("al")
+const mdui_btn_color = ref("#efefef");
 const musicInfo = ref({
-  name: 'Baby',
-  singer: 'Justin Bieber / Ludacris',
+  name: '罗生门（Follow）',
+  singer: '：梨冻紧 / Wiz_H张子豪',
 })
 watch(lyricModeStyle, (v) => {
   console.log("changeMusicLyricStyle")
 
-
+  if (v == "al") {
+    mdui_btn_color.value = "#efefef"
+  }else {
+    mdui_btn_color.value = "#303136"
+  }
   window.mul.cancel()// 取消了
   changeMusicLyricStyle(v);
 })
@@ -346,13 +385,12 @@ const goback = () => {
 }
 
 const music = ref(null);
+
 //const music = document.querySelector('audio');
+
+
 onMounted(() => {
-  getImageMainColorAndInvert(music_img.value).then((colors) => {
-    console.log("主题色:", colors.mainColor);
-    console.log("反色:", colors.invertedColor);
-    setColorScheme(colors.invertedColor);
-  });
+
   console.log(music.value);
   window.music = music.value;
   //当音频加载完成时触发
@@ -381,6 +419,13 @@ onMounted(() => {
 
       navigator.mediaSession.setActionHandler('pause', () => {
         music.value.pause();
+      });
+
+      navigator.mediaSession.setActionHandler("previoustrack", function () { // 上一首
+        console.log("previoustrack")
+      });
+      navigator.mediaSession.setActionHandler("nexttrack", function () { // 下一首
+        console.log("nexttrack");
       });
     }
   })
@@ -438,6 +483,9 @@ const changeMusicLyricStyle = (mode) => {
         scale: 1.2
       },
       lyricText: musicLyricText
+    }, (text) => {
+      console.log(text)
+      navigator.mediaSession.metadata.artist = text
     })
   } else if (mode == "al") {
     bg_more.value = "rgba(0, 0, 0, 0.2)"
@@ -448,7 +496,10 @@ const changeMusicLyricStyle = (mode) => {
       fontSize: 30, // 歌词的字体大小
       interval: 10, // 歌词的行间距
       ifInner: false, // 是否只在可见范围内播放动画，这样会减少卡顿，但是观感会差一些
-      animationOffsetTime: 40 // 动画偏移时间，越小越平滑，但是不能超过 lyricSync.offsetH 否则会出问题
+      animationOffsetTime: 30 // 动画偏移时间，越小越平滑，但是不能超过 lyricSync.offsetH 否则会出问题
+    }, (i, text) => {
+      console.log(text)
+      navigator.mediaSession.metadata.artist = text
     });
   }
 }
@@ -491,6 +542,10 @@ const cancalDebounce = debounce(() => {
 window.addEventListener('resize', cancalDebounce);
 onUnmounted(() => {
   window.removeEventListener('resize', cancalDebounce);
+  window.mul.cancel();
+  window.mul = null;
+  navigator.mediaSession.metadata = null;
+
 })
 
 async function getImageMainColorAndInvert(imageUrl) {
@@ -560,6 +615,7 @@ async function getImageMainColorAndInvert(imageUrl) {
 </script>
 
 <style scoped>
+
 .main_dia {
   position: absolute;
   width: 100vw;
@@ -577,6 +633,7 @@ async function getImageMainColorAndInvert(imageUrl) {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  --ss-online-mdui-btn-color: white
 }
 
 .img {
@@ -722,7 +779,7 @@ async function getImageMainColorAndInvert(imageUrl) {
   width: 100%;
   position: relative;
 
-  overflow: hidden;
+  overflow-y: auto;
 
   &::-webkit-scrollbar {
     display: none;
@@ -754,6 +811,11 @@ async function getImageMainColorAndInvert(imageUrl) {
   width: calc(100% / 4);
 
 }
+
+mdui-button-icon {
+  color: var(--ss-online-mdui-btn-color)
+}
+
 
 .ctx .footer .progress {
   width: 100%;
@@ -890,6 +952,9 @@ async function getImageMainColorAndInvert(imageUrl) {
   max-width: calc(100% - 20px);
 }
 
+.ctx .footer .image {
+  display: none;
+}
 
 @media screen and (min-width: 860px) {
   .ctx .content .image {
@@ -904,6 +969,44 @@ async function getImageMainColorAndInvert(imageUrl) {
     margin-top: 0px;
   }
 
+  .ctx .footer {
+    width: 40%;
+    height: calc(100% - 150px);
+  }
+
+  .ctx .content .lyric {
+    width: 100%;
+
+  }
+
+  .ctx .content {
+    width: calc(60% - 0px);
+    height: 100%;
+    float: right;
+  }
+
+  .ctx .content .image {
+    display: none;
+  }
+
+  .ctx .footer .image {
+    width: 100%;
+    height: calc(100% - 195px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.5s;
+  }
+
+  .ctx .footer .image img {
+    width: 60%;
+    border-radius: 15px;
+    box-shadow: 0px 19px 50px 0px rgba(100, 100, 111, 0.3);
+  }
+
+  mdui-button-icon {
+    color:none !important;
+  }
 }
 
 
@@ -918,7 +1021,7 @@ async function getImageMainColorAndInvert(imageUrl) {
   color: rgba(255, 255, 255, .25);
   transition: all 0.5s;
   font-weight: 700;
-
+  width: calc(100% - 30px);
   border-radius: 12px;
   transform-origin: left center;
   text-align: left;
@@ -926,6 +1029,7 @@ async function getImageMainColorAndInvert(imageUrl) {
 
 .apple_lyric_p:hover {
   background-color: rgba(255, 255, 255, 0.15);
+  filter: blur(0px) !important;
 }
 
 .apple_lyric_p:active {

@@ -3,16 +3,16 @@ import {ref, onMounted} from 'vue';
 import {snackbar} from "mdui/functions/snackbar.js";
 
 const userInfo = ref({
-  "id": 0,
-  "username": "---",
-  "email": "--",
-  "avatar": null,
-  "introduction": "---",
-  "love_music": null,
-  "songs_list": null,
-  "is_show_songs": null,
-  "is_admin": false,
-  "in_room": null,
+  id: 0,
+  username: "---",
+  email: "--",
+  avatar: null,
+  introduction: "---",
+  love_music: null,
+  songs_list: null,
+  is_show_songs: null,
+  is_admin: false,
+  in_room: null,
 })
 onMounted(() => {
   if (localStorage.getItem("sync_token")) {
@@ -54,14 +54,12 @@ onMounted(() => {
       </mdui-avatar>
     </div>
     <div class="info-right">
-      <p style="font-size: 25px;margin: 0;margin-top: 20px;font-weight: 700;">
+      <p style="font-size: 25px;margin: 0;margin-top: 20px;font-weight: 700;" :class="userInfo.is_admin ? 'adminP' : ''">
         {{ userInfo.username }}
       </p>
       <p style="margin: 0;margin-top: 5px;">
         {{ userInfo.introduction }}
       </p>
-
-
     </div>
 
   </div>
@@ -90,5 +88,10 @@ onMounted(() => {
 .info .info-right {
   width: calc(100% - 100px);
   height: 100%;
+}
+
+.adminP {
+  color: #3366FF; /*设置文字颜色*/
+  text-shadow: 0 4px 10px #6699FF; /*设置文字阴影*/
 }
 </style>
