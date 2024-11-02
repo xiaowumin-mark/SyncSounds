@@ -62,6 +62,7 @@ class AppleLyric {
             p.classList.add('apple_lyric_p');
             const time = (Number(arrTime[0]) * 60 * 1000) + (Number(doTime[0]) * 1000) + Number(doTime[1]);
             p.addEventListener('click', () => {
+                console.log(time);
                 this.audio.currentTime = time / 1000;
                 this.lrcContainer.scroll({
                     top: 0,

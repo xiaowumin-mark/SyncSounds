@@ -332,7 +332,7 @@ const musicLyricText = `[00:00.00] 作词 : 梨冻紧/Wiz_H张子豪
 [03:51.12]营销推广：贾皓然 欧阳慧琳 苏文嫒
 [03:58.83]本歌曲来自【青云 LAB】`
 const bg_more = ref("rgba(255, 255, 255, 0.7)");
-const music_img = ref("http://p1.music.126.net/yN1ke1xYMJ718FiHaDWtYQ==/109951165076380471.jpg?param=130y130")
+const music_img = ref("/img.png")
 const password = ref('');
 const is_paused = ref(true);
 const all_time = ref(1.0);
