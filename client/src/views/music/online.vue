@@ -101,7 +101,7 @@
   <!--  <img src="https://p1.music.126.net/4o8dGgZgouKRDQfl6Fp3dA==/109951169452179670.jpg?param=130y130"  :style="{viewTransitionName:'home1'}" alt="" srcset=""> -->
   <mdui-fab v-show="ID == 'h1'" style="position: fixed;bottom: 20px;right: 20px;z-index: 50;" icon="undo"
             @click="goback"></mdui-fab>
-  <audio src="/lsm.m4a" ref="music" id="music"></audio>
+  <audio src="/lsm.m4a" ref="music" id="music" preload="auto"></audio>
 
   <mdui-navigation-drawer placement="right" modal close-on-esc close-on-overlay-click contained ref="more"
                           style="position: fixed;">
