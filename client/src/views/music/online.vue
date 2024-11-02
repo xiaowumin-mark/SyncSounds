@@ -387,7 +387,7 @@ const goback = () => {
 const music = ref(null);
 
 //const music = document.querySelector('audio');
-
+window.music = music.value;
 
 onMounted(() => {
 
