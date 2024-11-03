@@ -487,11 +487,34 @@ app.get("/api/room/info/:id", async (req, res) => {
             id: id
         },
     }).then(d => {
-        res.json({
-            code: 200,
-            msg: "获取成功",
-            data: d
+        let sj = JSON.parse(d.songs);
+        Songs.findAll({
+            where: {
+                id: sj
+            }
+        }).then(sd => {
+            res.json({
+                code: 200,
+                msg: "获取成功",
+                data: {
+                    admin: JSON.parse(d.admin),
+                    allow_peoples_num: d.allow_peoples_num,
+                    createdAt: d.createdAt,
+                    id: d.id,
+                    image: d.image,
+                    intronduction: d.intronduction,
+                    is_public: d.is_public,
+                    messages: JSON.parse(d.messages),
+                    name: d.name,
+                    owner_id: d.owner_id,
+                    peoples: JSON.parse(d.peoples),
+                    peoples_num: d.peoples_num,
+                    songs: sd,
+                    theme_color: d.theme_color,
+                }
+            })
         })
+
     }).catch(e => {
         res.json({
             code: 500,
@@ -502,15 +525,26 @@ app.get("/api/room/info/:id", async (req, res) => {
 })
 
 app.get("/api/room", async (req, res) => {
+    let limit = req.query.limit ? Number(req.query.limit) : 15;
+    let offset = req.query.offset ? Number(req.query.offset) : 1;
     let rooms = await Rooms.findAll({
         where: {
             is_public: 1
-        }
+        },
+        order: [
+            ["id", "DESC"]
+        ],
+        limit: limit,
+        offset: limit * (offset - 1),
     });
     res.json({
         code: 200,
         msg: "获取成功",
-        data: rooms
+        data: rooms,
+        pages: Math.ceil(await Rooms.count() / limit),
+        limit: limit,
+        offset: offset,
+        count: await Rooms.count()
     })
 })
 
@@ -524,11 +558,24 @@ app.post("/api/room/new", async (req, res) => {
                 intronduction: d.intronduction,
                 allow_peoples_num: d.allow_peoples_num,
                 is_public: d.ispublic,
-                password: d.ispublic ? "" : Password(d.password),
+                password: (function () {
+
+                    if (d.ispublic) {
+                        console.log("public")
+                        return ""
+                    } else {
+                        let p = Password(d.password)
+                        console.log(p)
+                        return p
+                    }
+                }()),
                 songs: d.songs,
                 owner_id: user.id,
                 // 用unix时间戳作为房间号
-                room_id: Math.floor(Date.now() / 1000)
+                room_id: Math.floor(Date.now() / 1000),
+                peoples: "[]",
+                admin: JSON.stringify([user.id]),
+                messages: "[]"
             });
             res.json({
                 code: 200,
@@ -654,17 +701,11 @@ app.post("/api/wy/songListAllMysic", async (req, res) => {
 
 })
 
-let allPeople = 0
+
 //有新的客户端连接时触发
 io.on('connection', function (socket) {
-    allPeople++;
-    //接收到消息时触发
-    socket.on('message', function (data) {
-        console.log('服务端收到 : ', data);
-        //注意send()方法其实是发送一个 'message' 事件
-        //客户端要通过on('message')来响应
-        socket.send('你好客户端, ' + data);
-    });
+
+    console.log("有新的客户端连接了 ");
     //发生错误时触发
     socket.on('error', function (err) {
         console.log(err);
@@ -672,28 +713,36 @@ io.on('connection', function (socket) {
 });
 
 io.on("disconnect", function () {
-    allPeople--;
+
+    console.log("有客户端断开了 ");
 })
 
 const chatSpace = io.of("/chat");
-chatSpace.on("connection", function (socket) {
-    socket.on("join", (data) => {
+chatSpace.on("connection", function (s) {
+    s.on("join", (data) => {
+        console.log("join")
         verifyToken(data.token).then(async user => {
+            /*
+            * {
+            *   token
+            *   roomId
+            * }*/
             Rooms.findOne({
                 where: {
                     id: data.roomId,
                 }
             }).then(udata => {
+                console.log(udata)
                 if ((udata.peoples_num + 1) > udata.allow_peoples_num) {
 
-                    chatSpace.emit("error", {
+                    s.emit("error", {
                         code: 500,
                         msg: "房间已满",
                     })
                     return
                 }
                 if (!udata.is_public && !ComparePassword(data.password, udata.password)) {
-                    socket.emit("error", {
+                    s.emit("error", {
                         code: 500,
                         msg: "密码错误",
                     });
@@ -703,7 +752,7 @@ chatSpace.on("connection", function (socket) {
                 let peoples = JSON.parse(udata.peoples);
                 // 如果id在peoples中，则直接加入
                 if (peoples.indexOf(user.id) > -1) {
-                    chatSpace.emit("error", {
+                    s.emit("error", {
                         code: 500,
                         msg: "已加入房间",
                     })
@@ -718,7 +767,7 @@ chatSpace.on("connection", function (socket) {
                 user.update({
                     in_room: data.roomId
                 });
-                chatSpace.join(data.roomId);
+                s.join(data.roomId);
                 // 给除了自己之外的所有用户发送加入房间的消息
                 chatSpace.to(data.roomId).emit("join", {
                     code: 200,
@@ -739,12 +788,86 @@ chatSpace.on("connection", function (socket) {
             })
 
         }).catch(err => {
-            socket.emit("error", {
+            s.emit("error", {
                 code: 500,
                 msg: "token错误",
             })
         })
     })
+    s.on("quit", (data) => {
+        verifyToken(data.token).then(async user => {
+            Rooms.findOne({
+                where: {
+                    id: user.in_room
+                }
+            }).then(udata => {
+                let peoples = JSON.parse(udata.peoples);
+                //去除id
+                if (peoples.indexOf(user.id) > -1) {
+                    let index = peoples.indexOf(user.id);
+                    peoples.splice(index, 1);
+                } else {
+                    s.emit("error", {
+                        code: 500,
+                        msg: "未加入房间",
+                    })
+                    return
+                }
+                // 更新peoples
+                udata.update({
+                    peoples: JSON.stringify(peoples),
+                    peoples_num: udata.peoples_num - 1,
+                });
+
+            })
+        }).catch(err => {
+            s.emit("error", {
+                code: 500,
+                msg: "token错误",
+            })
+        })
+    })
+    s.on("message", (data) => {
+        verifyToken(data.token).then(async user => {
+            Rooms.findOne({
+                where: {
+                    id: user.in_room,
+                }
+            }).then(udata => {
+                let msg = JSON.parse(udata.messages);
+                let msd = {
+                    text: data.text,
+                    user: {
+                        name: user.username,
+                        avatar: user.avatar,
+                        id: user.id,
+                        is_admin: user.is_admin,
+                        email: user.email,
+                        introduction: user.introduction,
+                    },
+                    time: new Date().toISOString(),
+
+                }
+                msg.push(msd);
+
+                chatSpace.to(user.in_room).emit("message", {
+                    code: 200,
+                    msg: "发送成功",
+                    data: msd
+                })
+
+                udata.update({
+                    messages: JSON.stringify(msg),
+                });
+            })
+            //chatSpace.to(user.in_room).emit("message", data)
+        }).catch(err => {
+            s.emit("error", {
+                code: 500,
+                msg: "token错误",
+            })
+        })
+    });
 });
 
 server.listen(config.redis.port);

@@ -3,8 +3,10 @@ import '@mdui/icons/people.js';
 import '@mdui/icons/library-music.js';
 import '@mdui/icons/date-range.js';
 import router from '@/router';
-import {ref} from 'vue';
+import {ref} from 'vue'
 import T from '@/assets/tools.js'
+import {onMounted} from "vue";
+
 const join = ref(null)
 const my_drawer = ref(null)
 const TSNpush = (path) => {
@@ -16,14 +18,36 @@ const TSNpush = (path) => {
     router.push(path);
   }
 };
-
+const loading = ref(null);
 const roomList = ref([]);
-fetch(host + '/api/room')
-    .then(res => res.json())
-    .then(data => {
-      roomList.value = data.data
-    })
-    .catch(err => console.log(err));
+let page = 1;
+let allPages =1;
+
+function load() {
+  if (page > allPages) {
+    loading.value.innerHTML = '没有更多了呦~';
+  };
+  fetch(host + '/api/room?offset=' + page)
+      .then(res => res.json())
+      .then(data => {
+        roomList.value.push(...data.data);
+        allPages = data.pages;
+      })
+      .catch(err => console.log(err));
+  page++;
+}
+
+onMounted(() => {
+  // 当loadMore与视口交叉时
+  let loadMoreOberver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      console.log('loadMore')
+      load();
+    }
+  }, {threshold: 0.5})
+  loadMoreOberver.observe(loading.value)
+})
+
 
 //import {dialog} from "mdui/functions/dialog.js";
 
@@ -50,9 +74,9 @@ fetch(host + '/api/room')
     <mdui-card clickable class="card" v-for="i in roomList" @click="TSNpush('/music/' + i.id)" :key="i.id">
       <img :src="i.image ?  i.image:'/ss128x128.png'" alt="">
       <div class="top">
-        <p class="title">{{ i.name}}</p>
+        <p class="title">{{ i.name }}</p>
         <p class="introduction scrollbar">
-          {{i.intronduction}}
+          {{ i.intronduction }}
         </p>
       </div>
       <div class="buttom">
@@ -60,23 +84,25 @@ fetch(host + '/api/room')
           <div style="width: auto;height: 40px;display: flex;justify-content: center;align-items: center;">
             <mdui-icon-date-range style="width: 20px;"></mdui-icon-date-range>
           </div>
-          <span style="font-size: 13px;">{{T.Time(i.createdAt)}}</span>
+          <span style="font-size: 13px;">{{ T.Time(i.createdAt) }}</span>
         </div>
         <div style="width: 60px;height: 40px;display: flex;justify-content: start;align-items: center;">
           <div style="width: 40px;height: 40px;display: flex;justify-content: center;align-items: center;">
             <mdui-icon-library-music style="width: 20px;"></mdui-icon-library-music>
           </div>
-          <span style="font-size: 13px;">{{JSON.parse(i.songs).length}}</span>
+          <span style="font-size: 13px;">{{ JSON.parse(i.songs).length }}</span>
         </div>
         <div style="width: 60px;height: 40px;display: flex;justify-content: start;align-items: center;">
           <div style="width: 40px;height: 40px;display: flex;justify-content: center;align-items: center;">
             <mdui-icon-people style="width: 20px;"></mdui-icon-people>
           </div>
-          <span style="font-size: 13px;">{{i.peoples_num}}</span>
+          <span style="font-size: 13px;">{{ i.peoples_num }}</span>
         </div>
       </div>
     </mdui-card>
-
+    <div class="loading" ref="loading">
+      <mdui-circular-progress></mdui-circular-progress>
+    </div>
   </div>
   <mdui-dialog close-on-overlay-click headline="加入房间" ref="join">
     <mdui-text-field variant="outlined" label="输入房间号" style="margin-top: 10px;"></mdui-text-field>
@@ -120,7 +146,7 @@ fetch(host + '/api/room')
   font-weight: bolder;
   margin-top: 15px;
   font-size: 17px;
-  width: calc(100% - 70px);
+  width: calc(100% - 0px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -145,6 +171,14 @@ fetch(host + '/api/room')
   display: flex;
   justify-content: flex-end;
 
+}
+
+.loading {
+  width: 100%;
+  height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 @media screen and (max-width: 768px) {

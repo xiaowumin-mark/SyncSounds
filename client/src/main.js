@@ -12,6 +12,6 @@ app.use(router)
 
 router.isReady().then(() => app.mount('#app'))
 
-window.host = "http://127.0.0.1:3000"
+window.host = "http://192.168.1.199:3000"
 
 localStorage.wyCookie = ``

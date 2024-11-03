@@ -20,7 +20,7 @@ class AppleLyric {
             this.updateLrc();
         }
         this.func = func;
-        this.init();
+
 
     }
 
@@ -82,6 +82,7 @@ class AppleLyric {
     nextLrc(i = 0, data, isinit = false) {
         if (isinit) {
             for (let j = 0; j < data.length; j++) {
+
                 data[j].dom.style.top = this.getTopHeight(i, j, data) + 'px';
             }
             return;
@@ -199,6 +200,11 @@ class AppleLyric {
         this.lrcList = null;
         this.lastLrc = null;
         this.lrcContainer.innerHTML = '';
+    }
+
+    reInit(){
+        this.lrcContainer.innerHTML = '';
+        this.nextLrc(0, this.lrcList, true);
     }
 
 }

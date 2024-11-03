@@ -1,5 +1,5 @@
 <template>
-  <div class="main_dia" v-show="ID == 'h1'">
+  <div class="main_dia" v-show="!roomInfo.is_public">
     <img :src="music_img" alt=""
          class="img">
 
@@ -20,7 +20,7 @@
 
   </div>
 
-  <div class="app" v-show="ID != 'h1'" :style="{'--ss-online-mdui-btn-color' : mdui_btn_color}">
+  <div class="app" v-show="roomInfo.is_public" :style="{'--ss-online-mdui-btn-color' : mdui_btn_color}">
     <img :src="music_img" alt="" class="img">
     <div class="bg_more" :style="{'--ss-online-bg-more':bg_more}"></div>
     <div class="ctx">
@@ -99,7 +99,7 @@
     </div>
   </div>
   <!--  <img src="https://p1.music.126.net/4o8dGgZgouKRDQfl6Fp3dA==/109951169452179670.jpg?param=130y130"  :style="{viewTransitionName:'home1'}" alt="" srcset=""> -->
-  <mdui-fab v-show="ID == 'h1'" style="position: fixed;bottom: 20px;right: 20px;z-index: 50;" icon="undo"
+  <mdui-fab v-show="!roomInfo.is_public" style="position: fixed;bottom: 20px;right: 20px;z-index: 50;" icon="undo"
             @click="goback"></mdui-fab>
   <audio src="/lsm.m4a" ref="music" id="music" preload="auto"></audio>
 
@@ -160,60 +160,28 @@
       <mdui-top-app-bar-title>房间消息</mdui-top-app-bar-title>
       <mdui-button-icon icon="close" @click="message_dia.open = false"></mdui-button-icon>
     </mdui-top-app-bar>
-    <div style="height: auto;overflow-y: auto;padding-bottom: 50px" class="no_scrollbar">
-      <div class="chat_box">
-        <div class="left">
-          <img src="https://foruda.gitee.com/avatar/1720864383166909386/9548756_hycnb_1720864383.png!avatar200"
-               alt="" srcset="">
+    <div style="height: calc(100% - 100px);overflow-y: auto;padding-bottom: 50px" class="no_scrollbar" ref="msgs_view">
+      <div :class="item.user.id == me ? 'chat_box_r':'chat_box'"
+           v-for="(item,i) in roomInfo.messages" :key="i">
+        <div :class="item.user.id == me ? 'right':'left'">
+<!--          <img src="https://foruda.gitee.com/avatar/1720864383166909386/9548756_hycnb_1720864383.png!avatar200"
+               alt="" srcset="">-->
+          <mdui-avatar
+                       :src="item.user.avatar">{{ item.user.avatar ? "" : item.user.name[0] }}
+          </mdui-avatar>
         </div>
         <div class="main">
-          <div class="title">
-            无语
+          <div class="title" v-show="item.user.id != me">
+            {{ item.user.name }}
           </div>
           <div class="content">
-            枣殇嚎
+            {{ item.text }}
           </div>
         </div>
       </div>
 
-      <div class="chat_box_r">
-        <div class="right">
-          <img src="https://avatars.githubusercontent.com/u/3030330?s=40&v=4" alt="" srcset="">
-        </div>
-        <div class="main">
-          <div class="content">
-            泥嚎
-          </div>
-        </div>
-
-      </div>
-      <div class="chat_box_r">
-        <div class="right">
-          <img src="https://avatars.githubusercontent.com/u/3030330?s=40&v=4" alt="" srcset="">
-        </div>
-        <div class="main">
-          <div class="content">
-            泥嚎泥嚎
-          </div>
-        </div>
-
-      </div>
-      <div class="chat_box" v-for="i in 20">
-        <div class="left">
-          <img src="https://foruda.gitee.com/avatar/1720864383166909386/9548756_hycnb_1720864383.png!avatar200"
-               alt="" srcset="">
-        </div>
-        <div class="main">
-          <div class="title">
-            无语
-          </div>
-          <div class="content">
-            枣殇嚎啊
-          </div>
-        </div>
-      </div>
-      <mdui-text-field label="输入内容" style="width: calc(100% - 40px);position: fixed;bottom: 20px;right: 20px;">
-        <mdui-button-icon slot="end-icon" icon="send"></mdui-button-icon>
+      <mdui-text-field label="输入内容" style="width: calc(100% - 40px);position: fixed;bottom: 20px;right: 20px;" :value="msgs_view_input" @input="msgs_view_input = $event.target.value" @keydown.enter="send_msgs_msg">
+        <mdui-button-icon slot="end-icon" icon="send" @click="send_msgs_msg"></mdui-button-icon>
       </mdui-text-field>
     </div>
   </mdui-dialog>
@@ -222,17 +190,87 @@
 
 <script setup>
 import router from '@/router';
+import {useRoute} from "vue-router";
 import {
   ref, onMounted, watch, onUnmounted
 } from 'vue';
 import {snackbar} from "mdui/functions/snackbar.js";
 // 获取params参数
-const ID = ref(router.currentRoute.value.params.id);
+const route = useRoute();
+const ID = ref(route.params.id);
 import musicLyric from "@/assets/ml";
 import AppleLyric from "@/assets/apple-lyric.js";
 import {setColorScheme} from 'mdui/functions/setColorScheme.js';
+import {io} from "socket.io-client";
+import {dialog} from "mdui/functions/dialog.js";
 
+const me = Number(localStorage.sync_user)
+const msgs_view_input = ref("");
+const msgs_view = ref(null);
+const socket = io(host + "/chat", {
+  transports: ['websocket'], // 仅使用WebSocket传输协议
+  extraHeaders: {
+    'Access-Control-Allow-Origin': '*', // 设置跨域请求头
+  }
+});
+window.socket = socket;
+socket.on("connect", () => {
+  console.log("连接成功")
 
+});
+socket.on("error", e => {
+  console.error(e)
+
+  dialog({
+    headline: "错误",
+    description: e.msg,
+    actions: [
+      {
+        text: "返回",
+        onClick: () => {
+          router.push("/")
+        },
+      }
+    ],
+
+  });
+})
+
+socket.on("message", data => {
+  console.log(data)
+  roomInfo.value.messages.push(data.data)
+  msgs_view.value.scrollTo({
+    top: msgs_view.value.scrollHeight,
+    behavior: "smooth"
+  })
+})
+const roomInfo = ref({is_public: false});
+console.log(ID.value);
+fetch(host + "/api/room/info/" + ID.value)
+    .then(res => res.json())
+    .then((data) => {
+      console.log(data)
+      roomInfo.value = data.data
+      socket.emit("join", {
+        roomId: data.data.id,
+        token: localStorage.getItem("sync_token")
+      })
+      if (data.data.is_public) {
+        console.log("公开房间")
+      } else {
+        console.log("私密房间")
+      }
+    })
+    .catch(e => {
+      console.error(e)
+    })
+const send_msgs_msg = () => {
+  socket.emit("message", {
+    token: localStorage.getItem("sync_token"),
+    text: msgs_view_input.value,
+  })
+  msgs_view_input.value = ""
+}
 const musicLyricText = `[00:00.00] 作词 : 梨冻紧/Wiz_H张子豪
 [00:01.00] 作曲 : 梨冻紧/Wiz_H张子豪
 [00:02.00] 编曲 : Wiz_H张子豪
@@ -353,23 +391,12 @@ watch(lyricModeStyle, (v) => {
 
   if (v == "al") {
     mdui_btn_color.value = "#efefef"
-  }else {
+  } else {
     mdui_btn_color.value = "#303136"
   }
   window.mul.cancel()// 取消了
   changeMusicLyricStyle(v);
 })
-const enter = () => {
-  if (password.value === '1145141') {
-    alert('请输入密码');
-    return;
-  } else {
-    snackbar({
-      message: "密码错误，请重新输入",
-      placement: "top",
-    });
-  }
-}
 
 
 const goback = () => {
@@ -501,6 +528,9 @@ const changeMusicLyricStyle = (mode) => {
       console.log(text)
       navigator.mediaSession.metadata.artist = text
     });
+    setTimeout(() => {
+      mul.init()
+    }, 1000)
   }
 }
 // screen and (min-width: 860px)
@@ -545,6 +575,12 @@ onUnmounted(() => {
   window.mul.cancel();
   window.mul = null;
   navigator.mediaSession.metadata = null;
+  socket.emit("quit", {
+    token: localStorage.getItem("sync_token")
+  })
+  socket.disconnect();
+  socket.close();
+  socket.removeAllListeners();
 
 })
 
@@ -882,7 +918,7 @@ mdui-button-icon {
   border-radius: 15px;
 }
 
-.chat_box .left img {
+.chat_box .left mdui-avatar {
   width: 100%;
   height: 100%;
   border-radius: 15px;
@@ -926,7 +962,7 @@ mdui-button-icon {
   border-radius: 15px;
 }
 
-.chat_box_r .right img {
+.chat_box_r .right mdui-avatar {
   width: 100%;
   height: 100%;
   border-radius: 15px;
@@ -1005,7 +1041,7 @@ mdui-button-icon {
   }
 
   mdui-button-icon {
-    color:none !important;
+    color: none !important;
   }
 }
 
