@@ -77,7 +77,7 @@
             <mdui-button-icon selectable icon="favorite_border" selected-icon="favorite"></mdui-button-icon>
           </div>
           <div class="item">
-            <mdui-button-icon icon="message--outlined" @click="message_dia.open = true"></mdui-button-icon>
+            <mdui-button-icon icon="message--outlined" @click="msg_view_open()"></mdui-button-icon>
           </div>
         </div>
         <div class="progress">
@@ -164,10 +164,10 @@
       <div :class="item.user.id == me ? 'chat_box_r':'chat_box'"
            v-for="(item,i) in roomInfo.messages" :key="i">
         <div :class="item.user.id == me ? 'right':'left'">
-<!--          <img src="https://foruda.gitee.com/avatar/1720864383166909386/9548756_hycnb_1720864383.png!avatar200"
-               alt="" srcset="">-->
+          <!--          <img src="https://foruda.gitee.com/avatar/1720864383166909386/9548756_hycnb_1720864383.png!avatar200"
+                         alt="" srcset="">-->
           <mdui-avatar
-                       :src="item.user.avatar">{{ item.user.avatar ? "" : item.user.name[0] }}
+              :src="item.user.avatar">{{ item.user.avatar ? "" : item.user.name[0] }}
           </mdui-avatar>
         </div>
         <div class="main">
@@ -180,7 +180,9 @@
         </div>
       </div>
 
-      <mdui-text-field label="输入内容" style="width: calc(100% - 40px);position: fixed;bottom: 20px;right: 20px;" :value="msgs_view_input" @input="msgs_view_input = $event.target.value" @keydown.enter="send_msgs_msg">
+      <mdui-text-field label="输入内容" style="width: calc(100% - 40px);position: fixed;bottom: 20px;right: 20px;"
+                       :value="msgs_view_input" @input="msgs_view_input = $event.target.value"
+                       @keydown.enter="send_msgs_msg">
         <mdui-button-icon slot="end-icon" icon="send" @click="send_msgs_msg"></mdui-button-icon>
       </mdui-text-field>
     </div>
@@ -207,6 +209,19 @@ import {dialog} from "mdui/functions/dialog.js";
 const me = Number(localStorage.sync_user)
 const msgs_view_input = ref("");
 const msgs_view = ref(null);
+const msg_view_open = () => {
+  message_dia.value.open = true;
+  msg_view_scroll_bottom()
+
+}
+const msg_view_scroll_bottom = () => {
+  setTimeout(() => {
+    msgs_view.value.scrollTo({
+      top: msgs_view.value.scrollHeight + 1000,
+      behavior: "smooth"
+    })
+  }, 10)
+}
 const socket = io(host + "/chat", {
   transports: ['websocket'], // 仅使用WebSocket传输协议
   extraHeaders: {
@@ -239,10 +254,15 @@ socket.on("error", e => {
 socket.on("message", data => {
   console.log(data)
   roomInfo.value.messages.push(data.data)
-  msgs_view.value.scrollTo({
-    top: msgs_view.value.scrollHeight,
-    behavior: "smooth"
-  })
+  msg_view_scroll_bottom()
+})
+
+socket.on("people", data => {
+  console.log(data)
+})
+
+socket.on("join", data => {
+  console.log(data)
 })
 const roomInfo = ref({is_public: false});
 console.log(ID.value);
@@ -265,6 +285,13 @@ fetch(host + "/api/room/info/" + ID.value)
       console.error(e)
     })
 const send_msgs_msg = () => {
+  if (msgs_view_input.value == "") {
+    snackbar({
+      message: "内容不能为空",
+      icon: 'error',
+    });
+    return
+  }
   socket.emit("message", {
     token: localStorage.getItem("sync_token"),
     text: msgs_view_input.value,
@@ -941,6 +968,7 @@ mdui-button-icon {
   border-radius: 3px 15px 15px 15px;
   display: inline-block;
   max-width: calc(100% - 20px);
+  word-wrap: break-word;
 }
 
 .chat_box .main .title {
@@ -986,6 +1014,7 @@ mdui-button-icon {
   border-radius: 15px 3px 15px 15px;
   display: inline-block;
   max-width: calc(100% - 20px);
+  word-wrap: break-word;
 }
 
 .ctx .footer .image {

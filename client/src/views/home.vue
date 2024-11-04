@@ -32,6 +32,9 @@ function load() {
       .then(data => {
         roomList.value.push(...data.data);
         allPages = data.pages;
+        if (data.count < 15) {
+          loading.value.innerHTML = '';
+        }
       })
       .catch(err => console.log(err));
   page++;

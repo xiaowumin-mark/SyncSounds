@@ -486,36 +486,61 @@ app.get("/api/room/info/:id", async (req, res) => {
         where: {
             id: id
         },
-    }).then(d => {
+    }).then(async d => {
         let sj = JSON.parse(d.songs);
-        Songs.findAll({
+        const sd = await Songs.findAll({
             where: {
                 id: sj
             }
-        }).then(sd => {
-            res.json({
-                code: 200,
-                msg: "获取成功",
-                data: {
-                    admin: JSON.parse(d.admin),
-                    allow_peoples_num: d.allow_peoples_num,
-                    createdAt: d.createdAt,
-                    id: d.id,
-                    image: d.image,
-                    intronduction: d.intronduction,
-                    is_public: d.is_public,
-                    messages: JSON.parse(d.messages),
-                    name: d.name,
-                    owner_id: d.owner_id,
-                    peoples: JSON.parse(d.peoples),
-                    peoples_num: d.peoples_num,
-                    songs: sd,
-                    theme_color: d.theme_color,
-                }
+        })
+        let peos = await User.findAll({
+            where: {
+                id: JSON.parse(d.peoples)
+            }
+        })
+        let peolesData = []
+        const adminP = JSON.parse(d.admin)
+        for (let i = 0; i < peos.length; i++) {
+            console.log(peos[i]);
+            let isAD = false;
+            // 检查d.admin是否存在当前用户id
+            if (adminP.includes(peos[i].id)) {
+                isAD = true
+            }
+            peolesData.push({
+                name: peos[i].username,
+                id: peos[i].id,
+                is_room_admin: isAD,
+                avatar: peos[i].avatar,
+                introduction: peos[i].introduction,
+                in_room: peos[i].in_room,
+                is_admin: peos[i].is_admin,
             })
+        }
+        res.json({
+            code: 200,
+            msg: "获取成功",
+            data: {
+                admin: JSON.parse(d.admin),
+                allow_peoples_num: d.allow_peoples_num,
+                createdAt: d.createdAt,
+                id: d.id,
+                image: d.image,
+                intronduction: d.intronduction,
+                is_public: d.is_public,
+                messages: JSON.parse(d.messages),
+                name: d.name,
+                owner_id: d.owner_id,
+                peoples: peolesData,
+                peoples_num: d.peoples_num,
+                songs: sd,
+                theme_color: d.theme_color,
+            }
         })
 
+
     }).catch(e => {
+        console.log(e)
         res.json({
             code: 500,
             msg: "该房间不存在",
@@ -536,7 +561,9 @@ app.get("/api/room", async (req, res) => {
         ],
         limit: limit,
         offset: limit * (offset - 1),
+        attributes: ["id", "name", "intronduction", "allow_peoples_num", "is_public", "image", "theme_color", "peoples_num", "createdAt", "owner_id", "songs"],
     });
+
     res.json({
         code: 200,
         msg: "获取成功",
@@ -731,8 +758,8 @@ chatSpace.on("connection", function (s) {
                 where: {
                     id: data.roomId,
                 }
-            }).then(udata => {
-                console.log(udata)
+            }).then(async udata => {
+                //console.log(udata)
                 if ((udata.peoples_num + 1) > udata.allow_peoples_num) {
 
                     s.emit("error", {
@@ -767,11 +794,17 @@ chatSpace.on("connection", function (s) {
                 user.update({
                     in_room: data.roomId
                 });
+                const adminP = JSON.parse(udata.admin)
+                let peos = await User.findAll({
+                    where: {
+                        id: peoples
+                    }
+                });
                 s.join(data.roomId);
                 // 给除了自己之外的所有用户发送加入房间的消息
                 chatSpace.to(data.roomId).emit("join", {
                     code: 200,
-                    msg: data.username + " 加入房间",
+                    msg: user.username + " 加入房间",
                     data: {
                         peoples: peoples,
                         peoples_num: udata.peoples_num,
@@ -782,9 +815,31 @@ chatSpace.on("connection", function (s) {
                             is_admin: user.is_admin,
                             email: user.email,
                             introduction: user.introduction,
-                        }
+                        },
+                        is_room_admin: adminP.includes(user.id),
                     }
                 })
+
+                let peolesData = []
+
+                for (let i = 0; i < peos.length; i++) {
+                    console.log(peos[i]);
+                    let isAD = false;
+                    // 检查d.admin是否存在当前用户id
+                    if (adminP.includes(peos[i].id)) {
+                        isAD = true
+                    }
+                    peolesData.push({
+                        name: peos[i].username,
+                        id: peos[i].id,
+                        is_room_admin: isAD,
+                        avatar: peos[i].avatar,
+                        introduction: peos[i].introduction,
+                        in_room: peos[i].in_room,
+                        is_admin: peos[i].is_admin,
+                    })
+                }
+                s.emit("people", peolesData)
             })
 
         }).catch(err => {
