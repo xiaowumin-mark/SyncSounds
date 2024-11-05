@@ -129,26 +129,24 @@
   <mdui-dialog close-on-overlay-click class="example-header" fullscreen ref="people_dia">
     <mdui-top-app-bar slot="header">
       <mdui-top-app-bar-title>房间成员
-        <mdui-badge>12</mdui-badge>
+        <mdui-badge>{{ people_view_data.length }}</mdui-badge>
       </mdui-top-app-bar-title>
       <mdui-button-icon icon="close" @click="people_dia.open = false"></mdui-button-icon>
     </mdui-top-app-bar>
     <div style="height: 100%;overflow-y: auto;" class="scrollbar">
       <mdui-list>
 
-        <mdui-dropdown trigger="contextmenu" open-on-pointer v-for="i in 12" :key="i">
+        <mdui-dropdown trigger="contextmenu" open-on-pointer v-for="i in people_view_data" :key="i.id">
           <mdui-list-item rounded slot="trigger">
-            Headline
+            {{ i.name }}
             <mdui-avatar slot="icon"
-                         src="https://avatars.githubusercontent.com/u/3030330?s=40&v=4"></mdui-avatar>
-            <span slot="description" v-show="i == 1">房主</span>
-            <span slot="description" v-show="i >= 2 && i <= 8">管理员</span>
+                         :src="i.avatar">{{ i.avatar ? "" : i.name[0] }}
+            </mdui-avatar>
+            <span slot="description" v-show="i.is_room_admin">{{ i.is_room_admin ? "管理员" : "" }}</span>
           </mdui-list-item>
-          <mdui-menu>
-            <mdui-menu-item>取消管理员</mdui-menu-item>
-            <mdui-menu-item>设为管理员</mdui-menu-item>
+          <mdui-menu v-show="roomInfo.admin.includes(me)">
+            <mdui-menu-item v-show="!roomInfo.admin.includes(i.id)">设为管理员</mdui-menu-item>
             <mdui-menu-item>踢出房间</mdui-menu-item>
-
           </mdui-menu>
         </mdui-dropdown>
       </mdui-list>
@@ -222,6 +220,8 @@ const msg_view_scroll_bottom = () => {
     })
   }, 10)
 }
+
+const people_view_data = ref([]);
 const socket = io(host + "/chat", {
   transports: ['websocket'], // 仅使用WebSocket传输协议
   extraHeaders: {
@@ -259,10 +259,31 @@ socket.on("message", data => {
 
 socket.on("people", data => {
   console.log(data)
+  people_view_data.value = data
 })
 
 socket.on("join", data => {
   console.log(data)
+  people_view_data.value.push({
+    avatar: data.data.user.avatar,
+    name: data.data.user.name,
+    id: data.data.user.id,
+    is_room_admin: data.data.is_room_admin,
+    introduction: data.data.user.introduction,
+    is_admin: data.data.user.is_admin,
+    in_room: data.data.user.in_room,
+  })
+})
+
+socket.on("quit", data => {
+  console.log(data)
+  // 查找people_view_data中id为data.id的元素，并删除
+  for (let i = 0; i < people_view_data.value.length; i++) {
+    if (people_view_data.value[i].id == data.id) {
+      people_view_data.value.splice(i, 1);
+      break;
+    }
+  }
 })
 const roomInfo = ref({is_public: false});
 console.log(ID.value);
@@ -434,8 +455,6 @@ const goback = () => {
   } else {
     router.go(-1);
   }
-
-
 }
 
 const music = ref(null);
@@ -603,7 +622,8 @@ onUnmounted(() => {
   window.mul = null;
   navigator.mediaSession.metadata = null;
   socket.emit("quit", {
-    token: localStorage.getItem("sync_token")
+    token: localStorage.getItem("sync_token"),
+    room: ID.value,
   })
   socket.disconnect();
   socket.close();

@@ -802,7 +802,8 @@ chatSpace.on("connection", function (s) {
                 });
                 s.join(data.roomId);
                 // 给除了自己之外的所有用户发送加入房间的消息
-                chatSpace.to(data.roomId).emit("join", {
+
+                s.to(data.roomId).emit("join", {
                     code: 200,
                     msg: user.username + " 加入房间",
                     data: {
@@ -819,6 +820,7 @@ chatSpace.on("connection", function (s) {
                         is_room_admin: adminP.includes(user.id),
                     }
                 })
+
 
                 let peolesData = []
 
@@ -873,7 +875,11 @@ chatSpace.on("connection", function (s) {
                     peoples: JSON.stringify(peoples),
                     peoples_num: udata.peoples_num - 1,
                 });
-
+                s.to(user.in_room).emit("quit", {
+                    id: user.id,
+                    code: 200,
+                    msg: user.username + " 退出房间",
+                })
             })
         }).catch(err => {
             s.emit("error", {
