@@ -28,6 +28,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use("/static", express.static(path.join(__dirname, 'static')));
+app.use(express.static(path.join(__dirname, 'app')));
 let server = http.createServer(app);
 let io = require('socket.io')(server);
 

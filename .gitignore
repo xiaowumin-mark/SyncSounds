@@ -10,6 +10,7 @@ lerna-debug.log*
 /server/node_modules
 /client/node_modules
 /server/static/music
+/server/app
 /server/static/ua
 .DS_Store
 /client/dist

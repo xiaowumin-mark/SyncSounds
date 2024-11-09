@@ -89,7 +89,7 @@
             <mdui-button-icon icon="skip_previous"></mdui-button-icon>
           </div>
           <div class="center">
-            <mdui-fab :icon="is_paused ? 'play_arrow' : 'pause'" @click="tooglePlay"></mdui-fab>
+            <mdui-fab :icon="is_paused ? 'play_arrow' : 'pause'" @click="tooglePlay" :style="{borderRadius : is_paused ? '50%': 'var(--shape-corner-normal)'}" style="transition: all 0.3s"></mdui-fab>
           </div>
           <div class="right">
             <mdui-button-icon icon="skip_next"></mdui-button-icon>
@@ -101,7 +101,7 @@
   <!--  <img src="https://p1.music.126.net/4o8dGgZgouKRDQfl6Fp3dA==/109951169452179670.jpg?param=130y130"  :style="{viewTransitionName:'home1'}" alt="" srcset=""> -->
   <mdui-fab v-show="!roomInfo.is_public" style="position: fixed;bottom: 20px;right: 20px;z-index: 50;" icon="undo"
             @click="goback"></mdui-fab>
-  <audio src="/lsm.m4a" ref="music" id="music" preload="auto"></audio>
+  <audio src="/lmg.flac" ref="music" id="music" preload="auto"></audio>
 
   <mdui-navigation-drawer placement="right" modal close-on-esc close-on-overlay-click contained ref="more"
                           style="position: fixed;">
@@ -319,104 +319,66 @@ const send_msgs_msg = () => {
   })
   msgs_view_input.value = ""
 }
-const musicLyricText = `[00:00.00] 作词 : 梨冻紧/Wiz_H张子豪
-[00:01.00] 作曲 : 梨冻紧/Wiz_H张子豪
-[00:02.00] 编曲 : Wiz_H张子豪
-[00:03.00] 钢琴 : 梨冻紧
-[00:04.00] 封面 : 蓝明初
-[00:05.00] 混音 : 官硕
-[00:06.00] 母带 : Mai＂ No Label Crew＂
-[00:07.00] 监制 : Mai＂ No Label Crew＂
-[00:08.00] 发行 : No Label Crew
-[00:09.00] 企划 : 苏文嫒 张琛
-[00:30.60]我没转身
-[00:31.71]一直走一直梦
-[00:33.69]一直疯一直没停留
-[00:37.83]那些美好的
-[00:39.27]越靠近越沉溺
-[00:41.22]越来越不想放手
-[00:45.99] Wherever you go
-[00:53.13] Wherever you go
-[01:01.26] Follow
-[01:02.04]每到晚上理智变得感性
-[01:04.44]我编了这条短信
-[01:05.67]说不在乎不过是我嘴硬
-[01:07.65]总是期待你有什么反应
-[01:09.48]对你没法保持那份冷静
-[01:11.22]偷偷想着我们之间关系的远近
-[01:13.23]我的心里没有任何的侥幸
-[01:14.85]我知道我的爱对你来说就好像软禁
-[01:16.74]我们都闭口不提
-[01:18.42]这跨不过的距离
-[01:20.04]我们不停的一再复习着
-[01:22.02]那些感情里俗套的剧情
-[01:23.76]你那里是怎么样的天气
-[01:25.74]夜空是否还是那么透明
-[01:27.51]我说的又开始不着了边际
-[01:29.52]可是没有你我真的不行
-[01:31.14]就请你
-[01:32.19]把我当成贪得无厌
-[01:34.11]把我当作得寸进尺
-[01:35.79]每当难过表情在你脸上浮现
-[01:37.65]我也难过得像照着一面镜子
-[01:39.51]多么希望和你在一起的时间
-[01:41.46]那些快乐可以突然静止
-[01:43.26]多么希望时间可以快点
-[01:44.97]带我和你一起体验生老和病死
-[01:46.77]我想过下次会更好
-[01:48.15]也开始更加了解了你的脾气
-[01:50.31]可是下次我们还是争吵
-[01:52.02]下次可能还是不留余地
-[01:54.00]我爱你不遗余力
-[01:55.59]在爱里不停期待奇迹
-[01:57.57]不忍看你这么痛苦
-[01:59.25]又不愿离去
-[02:00.69] and i will
-[02:01.29] Follow
-[02:01.83]一直走一直梦
-[02:03.66]一直疯一直没停留
-[02:07.83]那些美好的
-[02:09.27]越靠近越沉溺
-[02:11.19]越来越不想放手
-[02:15.60] Wherever you go
-[02:23.13] Wherever you go
-[02:32.61] Wherever you go
-[02:34.44] Wherever you go
-[02:36.48]一直都搞不定自己的情绪在你走后
-[02:40.05] Wherever you go
-[02:41.88] just want you to know
-[02:43.95]你知道我的心一直都在原地为你等候
-[02:46.65]其实对天气不感兴趣
-[02:48.15]想知道你会不会太冷
-[02:50.28]没法完成那份陪伴
-[02:51.78]孤独你会不会在忍
-[02:53.79]不知道想念你的痛苦
-[02:55.50]来的到底会不会太准
-[02:57.36]只知道当你不在床上
-[02:59.25]我总是睡得不会太稳
-[03:01.53]我们看惯了世间的罗生门
-[03:03.45]变得好像陌生人
-[03:05.28]两颗同样不安的心脏被塞进了同一个摩天轮
-[03:09.03]每次拥抱停留在清晨
-[03:10.98]窗外大雨在倾盆
-[03:12.75]我们好像巨大城市里面两个相爱的外星人
-[03:16.53]可我不想生活在套路里
-[03:18.45]想把心事都告诉你
-[03:19.86]我想要一直照顾你
-[03:21.72]又总害怕你耗不起
-[03:24.54]滴答的秒针又在
-[03:26.16]提醒我爱你几分
-[03:28.23]只要听到你的声音
-[03:29.73]我一定会为你转身
-[03:31.74]一直走一直梦
-[03:33.66]一直疯一直没停留
-[03:37.86]那些美好的
-[03:39.27]越靠近越沉溺
-[03:41.22]越来越不想放手
-[03:45.66] Wherever you go
-[03:46.89] Wherever you go
-[03:51.12]营销推广：贾皓然 欧阳慧琳 苏文嫒
-[03:58.83]本歌曲来自【青云 LAB】`
+const musicLyricText = `[00:00.00] 作曲 : Mark Maxwell/Matt Rhoades
+[00:07.84]I don't think I m gonna want you back
+[00:09.77]But I know it wont be easy like that
+[00:11.65]Don't you come around and make me feel bad when we both got no place
+[00:14.64]To go
+[00:15.35]I don't think I m gonna play your game
+[00:17.33]Coz it s only gonna end one way
+[00:19.26]Things are always gonna be the same
+[00:20.79]It you never want to let me know
+[00:22.77]Back back turn it around round
+[00:25.61]up and you re down down just let me know
+[00:30.38]in in in are you out oh it s killing me
+[00:34.24]now you could just let me go
+[00:37.09]Nothings to save you now
+[00:40.90]Not when you crashing down
+[00:44.71]Somebody break me out
+[00:48.52]There s nothing to run for baby we re done for
+[00:52.28]If you don't let let let me go
+[00:56.14]If you don't let let let me go
+[00:59.95]I don't wanna loo loo lose control
+[01:03.76]But you wont let let let me go
+[01:08.78]Now you call me on the telephone
+[01:10.61]You only want me when you re alone
+[01:12.54]Turn the car around and drive back home
+[01:14.26]Coz you re never gonna let me know
+[01:16.35]And every night that you fall asleep
+[01:18.28]While you re dreaming of me
+[01:20.16]I m begging you to set me free
+[01:21.73]I m begging you to let me go
+[01:23.76]Back back turn it around round
+[01:26.65]up and you re down down just let me know
+[01:31.32]in in in are you out oh it s killing me
+[01:35.08]now you could just let me go
+[01:38.08]Nothings to save you now
+[01:41.84]Not when you crashing down
+[01:45.65]Somebody break me out
+[01:49.41]There s nothing to run for baby we re done for
+[01:53.22]If you don't let let let me go
+[01:57.03]If you don't let let let me go
+[02:00.89]I don't wanna loo loo lose control
+[02:04.70]But you wont let let let me go
+[02:09.67]I waited patiently I know you had a place for me
+[02:13.53]But now you re blinded by the life you lead
+[02:16.17]I m letting you know
+[02:20.03]You mean so much to me
+[02:26.63]You re everything I want to be
+[02:28.71]But now you re taking it away from me
+[02:31.10]I m letting you go
+[02:39.17]Nothings to save you now
+[02:42.83]Not when you crashing down
+[02:46.64]Somebody break me out
+[02:50.35]There s nothing to run for baby we re done for
+[02:54.15]If you don't let let let me go
+[02:58.01]If you don't let let let me go
+[03:01.82]I don't wanna loo loo lose control
+[03:05.63]But you wont let let let me go
+[03:09.49]If you don't let let let me go
+[03:13.30]If you don't let let let me go
+[03:17.06]I don't wanna loo loo lose control
+[03:20.87]But you wont let let let me go`
 const bg_more = ref("rgba(255, 255, 255, 0.7)");
 const music_img = ref("/img.png")
 const password = ref('');
@@ -431,8 +393,8 @@ const is_show_music_lrc = ref(true);
 const lyricModeStyle = ref("al")
 const mdui_btn_color = ref("#efefef");
 const musicInfo = ref({
-  name: '罗生门（Follow）',
-  singer: '：梨冻紧 / Wiz_H张子豪',
+  name: 'ME!',
+  singer: 'Taylor Swift / Brendon Urie',
 })
 watch(lyricModeStyle, (v) => {
   console.log("changeMusicLyricStyle")
@@ -565,15 +527,16 @@ const changeMusicLyricStyle = (mode) => {
     window.mul = new AppleLyric('#lrc', music.value, musicLyricText, {
       ifTrainsion: true, // 是否使用弹簧动画
       ifBlur: true, // 是否使用模糊效果
-      scale: 1.1, // 当前歌词的缩放比例
-      fontSize: 30, // 歌词的字体大小
-      interval: 10, // 歌词的行间距
+      scale: 1.2, // 当前歌词的缩放比例
+      fontSize: 35, // 歌词的字体大小
+      interval: 15, // 歌词的行间距
       ifInner: false, // 是否只在可见范围内播放动画，这样会减少卡顿，但是观感会差一些
-      animationOffsetTime: 30 // 动画偏移时间，越小越平滑，但是不能超过 lyricSync.offsetH 否则会出问题
+      animationOffsetTime: 20 // 动画偏移时间，越小越平滑，但是不能超过 lyricSync.offsetH 否则会出问题
     }, (i, text) => {
       console.log(text)
       navigator.mediaSession.metadata.artist = text
     });
+    mul.offsetH = 100
     setTimeout(() => {
       mul.init()
     }, 1000)
@@ -727,22 +690,25 @@ async function getImageMainColorAndInvert(imageUrl) {
   width: 100%;
   object-fit: cover;
   filter: blur(50px);
-  transform: scale(1.2);
-  animation: img_fllow_animate 5s infinite alternate;
+  transform: scale(1.3);
+  animation: img_fllow_animate 9s infinite alternate;
 }
 
 @keyframes img_fllow_animate {
   0% {
-    top: 10px;
-    left: 10px;
+    top: 5%;
+    left: 5%;
+    transform: scale(1.4);
   }
   50% {
-    top: -10px;
-    left: -10px;
+    top: -2%;
+    left: -2%;
+    transform: scale(1.2);
   }
   100% {
-    top: 0px;
-    left: 0px;
+    top: 0%;
+    left: 0%;
+    transform: scale(1.3);
   }
 }
 
@@ -1104,9 +1070,9 @@ mdui-button-icon {
   box-sizing: border-box;
   padding-bottom: 20px;
   color: rgba(255, 255, 255, .25);
-  transition: all 0.5s;
-  font-weight: 700;
-  width: calc(100% - 30px);
+  transition: color 0.5s, top 0.6s, transform 0.6s, filter 0.6s, background-color 0.1s;
+  font-weight: bold;
+  width: calc(100% - 90px);
   border-radius: 12px;
   transform-origin: left center;
   text-align: left;
