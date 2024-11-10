@@ -13,13 +13,7 @@ const {v4: uuid} = require('uuid');
 const fs = require('fs');
 const mtpy = require('multiparty');
 const {
-    search,
-    song_detail,
-    lyric,
-    song_download_url,
-    user_account,
-    user_playlist,
-    playlist_track_all
+    search, song_detail, lyric, song_download_url, user_account, user_playlist, playlist_track_all
 } = require('NeteaseCloudMusicApi');
 const axios = require('axios');
 
@@ -38,25 +32,17 @@ app.post("/api/user/register", async (req, res) => {
 
     try {
         let user = await User.create({
-            username: d.username,
-            password: Password(d.password),
-            introduction: d.introduction,
-            email: d.email,
+            username: d.username, password: Password(d.password), introduction: d.introduction, email: d.email,
         })
         res.json({
-            code: 200,
-            msg: "注册成功",
-            data: {
+            code: 200, msg: "注册成功", data: {
                 id: user.id,
-            },
-            token: generateToken(user.id)
+            }, token: generateToken(user.id)
         })
     } catch (e) {
         console.log(e);
         res.json({
-            code: 500,
-            msg: "注册失败",
-            data: null
+            code: 500, msg: "注册失败", data: null
         })
     }
 })
@@ -72,24 +58,17 @@ app.post("/api/user/login", async (req, res) => {
         if (user) {
             if (ComparePassword(d.password, user.password)) {
                 res.json({
-                    code: 200,
-                    msg: "登录成功",
-                    data: user,
-                    token: generateToken(user.id),
+                    code: 200, msg: "登录成功", data: user, token: generateToken(user.id),
                 })
             } else {
                 res.json({
-                    code: 500,
-                    msg: "密码错误",
-                    data: null
+                    code: 500, msg: "密码错误", data: null
                 })
             }
         }
     } catch (e) {
         res.json({
-            code: 500,
-            msg: "登录失败",
-            data: null
+            code: 500, msg: "登录失败", data: null
         })
     }
 })
@@ -111,22 +90,16 @@ app.post("/api/user/upload", (req, res) => {
                 });
 
                 res.json({
-                    code: 200,
-                    msg: "查询成功",
-                    data: user
+                    code: 200, msg: "查询成功", data: user
                 })
             } catch (e) {
                 res.json({
-                    code: 500,
-                    msg: "用户不存在",
-                    data: null
+                    code: 500, msg: "用户不存在", data: null
                 })
             }
         }).catch(err => {
             res.json({
-                code: 500,
-                msg: "token错误",
-                data: null
+                code: 500, msg: "token错误", data: null
             })
         });
 
@@ -146,15 +119,11 @@ app.post("/api/user/info", async (req, res) => {
 
     verifyToken(req.body.token).then(async user => {
         res.json({
-            code: 200,
-            msg: "查询成功",
-            data: user
+            code: 200, msg: "查询成功", data: user
         })
     }).catch(err => {
         res.json({
-            code: 500,
-            msg: "token错误",
-            data: null
+            code: 500, msg: "token错误", data: null
         })
     });
 
@@ -170,9 +139,7 @@ app.get("/api/user/info/:id", async (req, res) => {
             }
         });
         res.json({
-            code: 200,
-            msg: "查询成功",
-            data: {
+            code: 200, msg: "查询成功", data: {
                 username: user.username,
                 avatar: user.avatar,
                 introduction: user.introduction,
@@ -182,9 +149,7 @@ app.get("/api/user/info/:id", async (req, res) => {
         })
     } catch (e) {
         res.json({
-            code: 500,
-            msg: "查询失败",
-            data: null
+            code: 500, msg: "查询失败", data: null
         })
     }
 
@@ -194,20 +159,15 @@ app.get("/api/user/info/:id", async (req, res) => {
 app.get("/api/song/search", async (req, res) => {
     let name = req.query.name; // 搜索的名称
     search({
-        keywords: name,
-        type: 1,
+        keywords: name, type: 1,
     }).then(data => {
         res.json({
-            code: 200,
-            msg: "搜索成功",
-            data: data.body.result.songs
+            code: 200, msg: "搜索成功", data: data.body.result.songs
         })
     }).catch(e => {
         console.log(e);
         res.json({
-            code: 500,
-            msg: "搜索失败",
-            data: null
+            code: 500, msg: "搜索失败", data: null
         })
     });
 })
@@ -235,16 +195,12 @@ app.post("/api/song/addData", async (req, res) => {
             if (fee == 1) {
 
                 res.json({
-                    code: 500,
-                    msg: "该歌曲为付费歌曲",
-                    data: null
+                    code: 500, msg: "该歌曲为付费歌曲", data: null
                 })
                 return
             } else if (fee == 4) { // 付费专辑
                 res.json({
-                    code: 500,
-                    msg: "该歌曲为付费专辑",
-                    data: null
+                    code: 500, msg: "该歌曲为付费专辑", data: null
                 })
                 return
             }
@@ -275,11 +231,7 @@ app.post("/api/song/addData", async (req, res) => {
                     is_public: 1,
                     file: ""
                 });
-                res.json({
-                    code: 200,
-                    msg: "添加成功",
-                    data: Song
-                })
+
 
                 lyric({
                     id: song.id
@@ -306,9 +258,14 @@ app.post("/api/song/addData", async (req, res) => {
                             Song.update({
                                 file: "/static/music/" + song.id + "." + data.body.data.encodeType // 文件地址
                             });
-
+                            res.json({
+                                code: 200, msg: "添加成功", data: Song
+                            })
                         }).catch((e) => { // 下载失败
                             console.log(e);
+                            res.json({
+                                code: 500, msg: "添加失败", data: null
+                            })
                         });
                         // websocket 通知
                     })
@@ -316,24 +273,18 @@ app.post("/api/song/addData", async (req, res) => {
 
             } else { // 存在
                 res.json({
-                    code: 200,
-                    msg: "已存在",
-                    data: song_exist
+                    code: 200, msg: "已存在", data: song_exist
                 })
             }
         }).catch(e => {
             console.log(e);
             res.json({
-                code: 500,
-                msg: "添加失败",
-                data: null
+                code: 500, msg: "添加失败", data: null
             })
         });
     }).catch(err => {
         res.json({
-            code: 500,
-            msg: "token错误",
-            data: null
+            code: 500, msg: "token错误", data: null
         })
     });
 })
@@ -406,9 +357,7 @@ app.post("/api/song/addMoreMusic", (req, res) => {
                             file: "/static/music/" + spPath(files.file[0].path)
                         });
                         res.json({
-                            code: 200,
-                            msg: "添加成功",
-                            data: Song
+                            code: 200, msg: "添加成功", data: Song
                         })
 
                         lyric({
@@ -422,31 +371,23 @@ app.post("/api/song/addMoreMusic", (req, res) => {
 
                     } else { // 存在
                         res.json({
-                            code: 200,
-                            msg: "已存在",
-                            data: song_exist
+                            code: 200, msg: "已存在", data: song_exist
                         })
                     }
                 }).catch(e => {
                     console.log(e);
                     res.json({
-                        code: 500,
-                        msg: "添加失败",
-                        data: null
+                        code: 500, msg: "添加失败", data: null
                     })
                 });
             } catch (e) {
                 res.json({
-                    code: 500,
-                    msg: "用户不存在",
-                    data: null
+                    code: 500, msg: "用户不存在", data: null
                 })
             }
         }).catch(err => {
             res.json({
-                code: 500,
-                msg: "token错误",
-                data: null
+                code: 500, msg: "token错误", data: null
             })
         });
 
@@ -460,6 +401,7 @@ app.post("/api/song/addMoreMusic", (req, res) => {
 
     })
 
+
 });
 
 app.get("/api/song", async (req, res) => {
@@ -467,17 +409,11 @@ app.get("/api/song", async (req, res) => {
     let offset = req.query.offset ? Number(req.query.offset) : 0;
     // 分页查询
     let songs = await Songs.findAll({
-        limit: limit,
-        offset: offset
+        limit: limit, offset: offset
     });
 
     res.json({
-        code: 200,
-        msg: "获取成功",
-        data: songs,
-        count: await Songs.count(),
-        limit: limit,
-        offset: offset,
+        code: 200, msg: "获取成功", data: songs, count: await Songs.count(), limit: limit, offset: offset,
     });
 })
 
@@ -518,10 +454,13 @@ app.get("/api/room/info/:id", async (req, res) => {
                 is_admin: peos[i].is_admin,
             })
         }
+        const songdata = await Songs.findOne({
+            where: {
+                id: d.now_playing
+            }
+        });
         res.json({
-            code: 200,
-            msg: "获取成功",
-            data: {
+            code: 200, msg: "获取成功", data: {
                 admin: JSON.parse(d.admin),
                 allow_peoples_num: d.allow_peoples_num,
                 createdAt: d.createdAt,
@@ -536,6 +475,12 @@ app.get("/api/room/info/:id", async (req, res) => {
                 peoples_num: d.peoples_num,
                 songs: sd,
                 theme_color: d.theme_color,
+                now_playing: songdata,
+                updatedAt: d.updatedAt,
+                play_progress: d.play_progress,
+                play_mode: d.play_mode,
+                paused: d.paused,
+
             }
         })
 
@@ -543,9 +488,7 @@ app.get("/api/room/info/:id", async (req, res) => {
     }).catch(e => {
         console.log(e)
         res.json({
-            code: 500,
-            msg: "该房间不存在",
-            data: null
+            code: 500, msg: "该房间不存在", data: null
         })
     });
 })
@@ -557,9 +500,7 @@ app.get("/api/room", async (req, res) => {
         where: {
             is_public: 1
         },
-        order: [
-            ["id", "DESC"]
-        ],
+        order: [["id", "DESC"]],
         limit: limit,
         offset: limit * (offset - 1),
         attributes: ["id", "name", "intronduction", "allow_peoples_num", "is_public", "image", "theme_color", "peoples_num", "createdAt", "owner_id", "songs"],
@@ -598,30 +539,23 @@ app.post("/api/room/new", async (req, res) => {
                     }
                 }()),
                 songs: d.songs,
-                owner_id: user.id,
-                // 用unix时间戳作为房间号
+                owner_id: user.id, // 用unix时间戳作为房间号
                 room_id: Math.floor(Date.now() / 1000),
                 peoples: "[]",
                 admin: JSON.stringify([user.id]),
                 messages: "[]"
             });
             res.json({
-                code: 200,
-                msg: "创建成功",
-                data: room
+                code: 200, msg: "创建成功", data: room
             })
         } catch (e) {
             res.json({
-                code: 500,
-                msg: "创建失败",
-                data: null
+                code: 500, msg: "创建失败", data: null
             })
         }
     }).catch(err => {
         res.json({
-            code: 500,
-            msg: "token错误",
-            data: null
+            code: 500, msg: "token错误", data: null
         })
     });
 })
@@ -631,31 +565,24 @@ app.post("/api/room/remove", async (req, res) => {
     verifyToken(d.token).then(async user => {
         let room = await Rooms.findOne({
             where: {
-                room_id: d.id,
-                owner_id: user.id
+                room_id: d.id, owner_id: user.id
             }
         });
         if (room) {
             await room.destroy();
             res.json({
-                code: 200,
-                msg: "删除成功",
-                data: null
+                code: 200, msg: "删除成功", data: null
             })
             return
         } else {
             res.json({
-                code: 500,
-                msg: "删除失败",
-                data: null
+                code: 500, msg: "删除失败", data: null
             })
             return
         }
     }).catch(err => {
         res.json({
-            code: 500,
-            msg: "token错误",
-            data: null
+            code: 500, msg: "token错误", data: null
         })
     });
 
@@ -667,16 +594,12 @@ app.post("/api/wy/user_info", async (req, res) => {
         cookie: cookie
     }).then(data => {
         res.json({
-            code: 200,
-            msg: "获取成功",
-            data: data.body
+            code: 200, msg: "获取成功", data: data.body
         })
     }).catch(err => {
         console.log(err);
         res.json({
-            code: 500,
-            msg: "获取失败",
-            data: null
+            code: 500, msg: "获取失败", data: null
         })
     });
 
@@ -685,23 +608,17 @@ app.post("/api/wy/user_info", async (req, res) => {
 app.post("/api/wy/songlist", async (req, res) => {
     let cookie = req.body.cookie;
     let uid = req.query.uid;
-    user_playlist(
-        {
-            cookie: cookie,
-            uid: uid
-        }).then(data => {
+    user_playlist({
+        cookie: cookie, uid: uid
+    }).then(data => {
         res.json({
-            code: 200,
-            msg: "获取成功",
-            data: data.body
+            code: 200, msg: "获取成功", data: data.body
         })
 
     }).catch(err => {
         console.log(err);
         res.json({
-            code: 500,
-            msg: "获取失败",
-            data: null
+            code: 500, msg: "获取失败", data: null
         })
     })
 })
@@ -710,20 +627,15 @@ app.post("/api/wy/songListAllMysic", async (req, res) => {
     let cookie = req.body.cookie;
     let id = req.query.id;
     playlist_track_all({
-        cookie: cookie,
-        id: id
+        cookie: cookie, id: id
     }).then(data => {
         res.json({
-            code: 200,
-            msg: "获取成功",
-            data: data.body
+            code: 200, msg: "获取成功", data: data.body
         })
     }).catch(err => {
         console.log(err);
         res.json({
-            code: 500,
-            msg: "获取失败",
-            data: null
+            code: 500, msg: "获取失败", data: null
         })
     });
 
@@ -746,6 +658,7 @@ io.on("disconnect", function () {
 })
 
 const chatSpace = io.of("/chat");
+let RoomsData = {}
 chatSpace.on("connection", function (s) {
     s.on("join", (data) => {
         console.log("join")
@@ -760,19 +673,20 @@ chatSpace.on("connection", function (s) {
                     id: data.roomId,
                 }
             }).then(async udata => {
+                RoomsData[String(data.roomId)] = {
+                    playCompleteNum: 0,
+                }
                 //console.log(udata)
                 if ((udata.peoples_num + 1) > udata.allow_peoples_num) {
 
                     s.emit("error", {
-                        code: 500,
-                        msg: "房间已满",
+                        code: 500, msg: "房间已满",
                     })
                     return
                 }
                 if (!udata.is_public && !ComparePassword(data.password, udata.password)) {
                     s.emit("error", {
-                        code: 500,
-                        msg: "密码错误",
+                        code: 500, msg: "密码错误",
                     });
                     return;
                 }
@@ -781,16 +695,14 @@ chatSpace.on("connection", function (s) {
                 // 如果id在peoples中，则直接加入
                 if (peoples.indexOf(user.id) > -1) {
                     s.emit("error", {
-                        code: 500,
-                        msg: "已加入房间",
+                        code: 500, msg: "已加入房间",
                     })
                     return
                 }
                 peoples.push(user.id);
                 // 更新peoples
                 udata.update({
-                    peoples: JSON.stringify(peoples),
-                    peoples_num: udata.peoples_num + 1,
+                    peoples: JSON.stringify(peoples), peoples_num: udata.peoples_num + 1,
                 });
                 user.update({
                     in_room: data.roomId
@@ -805,20 +717,15 @@ chatSpace.on("connection", function (s) {
                 // 给除了自己之外的所有用户发送加入房间的消息
 
                 s.to(data.roomId).emit("join", {
-                    code: 200,
-                    msg: user.username + " 加入房间",
-                    data: {
-                        peoples: peoples,
-                        peoples_num: udata.peoples_num,
-                        user: {
+                    code: 200, msg: user.username + " 加入房间", data: {
+                        peoples: peoples, peoples_num: udata.peoples_num, user: {
                             name: user.username,
                             avatar: user.avatar,
                             id: user.id,
                             is_admin: user.is_admin,
                             email: user.email,
                             introduction: user.introduction,
-                        },
-                        is_room_admin: adminP.includes(user.id),
+                        }, is_room_admin: adminP.includes(user.id),
                     }
                 })
 
@@ -847,8 +754,7 @@ chatSpace.on("connection", function (s) {
 
         }).catch(err => {
             s.emit("error", {
-                code: 500,
-                msg: "token错误",
+                code: 500, msg: "token错误",
             })
         })
     })
@@ -866,26 +772,21 @@ chatSpace.on("connection", function (s) {
                     peoples.splice(index, 1);
                 } else {
                     s.emit("error", {
-                        code: 500,
-                        msg: "未加入房间",
+                        code: 500, msg: "未加入房间",
                     })
                     return
                 }
                 // 更新peoples
                 udata.update({
-                    peoples: JSON.stringify(peoples),
-                    peoples_num: udata.peoples_num - 1,
+                    peoples: JSON.stringify(peoples), peoples_num: udata.peoples_num - 1,
                 });
                 s.to(user.in_room).emit("quit", {
-                    id: user.id,
-                    code: 200,
-                    msg: user.username + " 退出房间",
+                    id: user.id, code: 200, msg: user.username + " 退出房间",
                 })
             })
         }).catch(err => {
             s.emit("error", {
-                code: 500,
-                msg: "token错误",
+                code: 500, msg: "token错误",
             })
         })
     })
@@ -898,24 +799,20 @@ chatSpace.on("connection", function (s) {
             }).then(udata => {
                 let msg = JSON.parse(udata.messages);
                 let msd = {
-                    text: data.text,
-                    user: {
+                    text: data.text, user: {
                         name: user.username,
                         avatar: user.avatar,
                         id: user.id,
                         is_admin: user.is_admin,
                         email: user.email,
                         introduction: user.introduction,
-                    },
-                    time: new Date().toISOString(),
+                    }, time: new Date().toISOString(),
 
                 }
                 msg.push(msd);
 
                 chatSpace.to(user.in_room).emit("message", {
-                    code: 200,
-                    msg: "发送成功",
-                    data: msd
+                    code: 200, msg: "发送成功", data: msd
                 })
 
                 udata.update({
@@ -925,12 +822,160 @@ chatSpace.on("connection", function (s) {
             //chatSpace.to(user.in_room).emit("message", data)
         }).catch(err => {
             s.emit("error", {
-                code: 500,
-                msg: "token错误",
+                code: 500, msg: "token错误",
             })
         })
     });
-});
+
+    s.on("force_exit", (data) => {
+        verifyToken(data.token)
+            .then(async user => {
+                const Room = await Rooms.findOne({
+                    where: {
+                        id: user.in_room,
+                    }
+                })
+                // 查看用户是否为房间管理员
+                const adminP = JSON.parse(Room.admin)
+                if (!adminP.includes(user.id)) {
+                    s.emit("error", {
+                        code: 500, msg: "没有权限",
+                    })
+                    return
+                }
+                // 向用户所在房间内广播退出消息，包含自己
+                chatSpace.to(user.in_room).emit("force_exit", {
+                    code: 200, msg: "管理员强制退出", data: {
+                        id: data.id,
+                    },
+                })
+
+            })
+            .catch(err => {
+                s.emit("error", {
+                    code: 500, msg: "token错误",
+                })
+            });
+    });
+    s.on("complete", (data) => {
+        verifyToken(data.token).then(async user => {
+            RoomsData[String(user.in_room)].playCompleteNum += 1;
+            const RoomD = await Rooms.findOne({
+                where: {
+                    id: user.in_room,
+                }
+            })
+            if (RoomD.peoples_num == RoomsData[String(user.in_room)].playCompleteNum) {
+                // 下一首歌曲
+                // 广播，包含自己
+                RoomsData[String(user.in_room)].playCompleteNum = 0;
+                chatSpace.to(user.in_room).emit("next", {
+                    code: 200, msg: "播放完成",
+                })
+            }
+
+            console.log(RoomsData)
+        }).catch(err => {
+            s.emit("error", {
+                code: 500, msg: "token错误"
+
+            })
+
+        })
+    })
+
+    s.on("change", (data) => {
+        verifyToken(data.token).then(async user => {
+            Rooms.findOne({
+                where: {
+                    id: user.in_room,
+                }
+            }).then(async udata => {
+                udata.update({
+                    now_playing: data.id, play_progress: 0,
+                }).then(async () => {
+                    // 更新播放列表
+                    Songs.findOne({
+                        where: {
+                            id: data.id,
+                        }
+                    }).then(async song => {
+                        // 广播，包含自己
+                        chatSpace.to(user.in_room).emit("change", {
+                            code: 200, msg: "切换成功", data: song
+                        })
+                    }).catch(err => {
+                        s.emit("error", {
+                            code: 500, msg: "歌曲不存在"
+                        })
+                    })
+                }).catch(err => {
+                    s.emit("error", {
+                        code: 500, msg: "更新播放列表失败"
+                    })
+                })
+
+
+            })
+        })
+            .catch(err => {
+                s.emit("error", {
+                    code: 500, msg: "token错误"
+
+                })
+            });
+    })
+
+    s.on("update_progress", (data) => {
+        verifyToken(data.token).then(async user => {
+            console.log("更新")
+            Rooms.findOne({
+                where: {
+                    id: user.in_room,
+                }
+            }).then(async udata => {
+                udata.update({
+                    play_progress: data.progress,
+                });
+            })
+        }).catch(err => {
+            s.emit("error", {
+                code: 500, msg: "token错误"
+
+            })
+        })
+    })
+
+    s.on("paused", (data) => {
+        verifyToken(data.token).then(async user => {
+            Rooms.findOne({
+                where: {
+                    id: user.in_room,
+                }
+            }).then(async udata => {
+                udata.update({
+                    paused: data.paused,
+                }).then(async () => {
+                    // 广播，不包含自己
+                    s.to(user.in_room).emit("paused", {
+                        code: 200, msg: "更新成功", data: {
+                            paused: data.paused,
+                        }
+                    })
+                }).catch(err => {
+                    s.emit("error", {
+                        code: 500, msg: "更新播放列表失败"
+                    })
+                })
+            })
+        }).catch(err => {
+            s.emit("error", {
+                code: 500, msg: "token错误"
+
+            })
+        })
+    })
+})
 
 server.listen(config.redis.port);
 
@@ -945,9 +990,7 @@ const downloadFile = async (url, destination, callback) => {
     const writer = fs.createWriteStream(destination); // 创建一个写入流
 
     const response = await axios({
-        method: 'GET',
-        url: url,
-        responseType: 'stream', // 将响应类型设置为流
+        method: 'GET', url: url, responseType: 'stream', // 将响应类型设置为流
         onDownloadProgress: (progressEvent) => {
             const {loaded, total} = progressEvent;
             const percentage = Math.floor((loaded * 100) / total); // 计算下载百分比

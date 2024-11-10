@@ -29,7 +29,6 @@ class AppleLyric {
         this.lrcList = this.parseLrc(this.lyricsText);
         for (let i = 0; i < this.lrcList.length; i++) {
             this.lrcContainer.appendChild(this.lrcList[i].dom);
-
         }
         this.nextLrc(0, this.lrcList, true);
 
@@ -50,6 +49,7 @@ class AppleLyric {
         let res = [];
 
         for (let i = 0; i < arr.length; i++) {
+            if (arr[i].length === 0) continue;
             arr[i] = arr[i].substring(1);
             let arrTL = arr[i].split(']');
             let arrTime = arrTL[0].split(':');
@@ -202,7 +202,7 @@ class AppleLyric {
         this.lrcContainer.innerHTML = '';
     }
 
-    reInit(){
+    reInit() {
         this.lrcContainer.innerHTML = '';
         this.nextLrc(0, this.lrcList, true);
     }

@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const {Sequelize, DataTypes} = require('sequelize');
 
 
 const sequelize = new Sequelize('sync-music', 'root', '123456', {
@@ -122,6 +122,25 @@ const Rooms = sequelize.define('rooms', {
         type: DataTypes.TEXT('long'),
         allowNull: true
     },
+    now_playing: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    play_progress: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0
+    },
+    play_mode: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0
+    },
+    paused: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: true
+    },
 }, {
     timestamps: true,
 });
@@ -152,7 +171,6 @@ const Songs = sequelize.define('songs', {
         type: DataTypes.TEXT('long')
 
 
-
     },
     peoples_num: {
         type: DataTypes.INTEGER,
@@ -172,7 +190,6 @@ const Songs = sequelize.define('songs', {
 });
 
 
-
 (async () => {
     try {
         await sequelize.authenticate();
@@ -184,4 +201,4 @@ const Songs = sequelize.define('songs', {
 })();
 
 // 导出sequalize和mUser
-module.exports = { sequelize, User, Rooms, Songs };
+module.exports = {sequelize, User, Rooms, Songs};

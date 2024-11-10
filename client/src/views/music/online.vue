@@ -89,7 +89,9 @@
             <mdui-button-icon icon="skip_previous"></mdui-button-icon>
           </div>
           <div class="center">
-            <mdui-fab :icon="is_paused ? 'play_arrow' : 'pause'" @click="tooglePlay" :style="{borderRadius : is_paused ? '50%': 'var(--shape-corner-normal)'}" style="transition: all 0.3s"></mdui-fab>
+            <mdui-fab :icon="is_paused ? 'play_arrow' : 'pause'" @click="tooglePlay"
+                      :style="{borderRadius : is_paused ? '50%': 'var(--shape-corner-normal)'}"
+                      style="transition: all 0.3s"></mdui-fab>
           </div>
           <div class="right">
             <mdui-button-icon icon="skip_next"></mdui-button-icon>
@@ -101,20 +103,21 @@
   <!--  <img src="https://p1.music.126.net/4o8dGgZgouKRDQfl6Fp3dA==/109951169452179670.jpg?param=130y130"  :style="{viewTransitionName:'home1'}" alt="" srcset=""> -->
   <mdui-fab v-show="!roomInfo.is_public" style="position: fixed;bottom: 20px;right: 20px;z-index: 50;" icon="undo"
             @click="goback"></mdui-fab>
-  <audio src="/lmg.flac" ref="music" id="music" preload="auto"></audio>
+  <audio :src="musicInfo.url" ref="music" id="music" preload="auto"></audio>
 
   <mdui-navigation-drawer placement="right" modal close-on-esc close-on-overlay-click contained ref="more"
                           style="position: fixed;">
     <div style="height: 100%;overflow-y: auto;" class="scrollbar">
       <mdui-list>
 
-        <mdui-dropdown trigger="contextmenu" open-on-pointer v-for="i in 12" :key="i">
-          <mdui-list-item rounded slot="trigger">
-            小美满
+        <mdui-dropdown trigger="contextmenu" open-on-pointer v-for="i in roomInfo.songs" :key="i.id">
+          <mdui-list-item rounded slot="trigger" @click="changeMusic(i)">
+            {{ i.name }}
             <mdui-avatar slot="icon"
-                         src="https://p1.music.126.net/9cySfhHshoKksSkAxwVVqw==/109951163175751210.jpg"></mdui-avatar>
-            <span slot="description">周深</span>
-            <mdui-button-icon slot="end-icon" variant="standard" icon="play_arrow"></mdui-button-icon>
+                         :src="i.image"></mdui-avatar>
+            <span slot="description">{{ i.singer }}</span>
+            <mdui-button-icon slot="end-icon" variant="standard"
+                              :icon="musicInfo.id == i.id ? 'pause' : 'play_arrow'"></mdui-button-icon>
           </mdui-list-item>
           <mdui-menu>
             <mdui-menu-item>删除歌曲</mdui-menu-item>
@@ -145,8 +148,8 @@
             <span slot="description" v-show="i.is_room_admin">{{ i.is_room_admin ? "管理员" : "" }}</span>
           </mdui-list-item>
           <mdui-menu v-show="roomInfo.admin.includes(me)">
-            <mdui-menu-item v-show="!roomInfo.admin.includes(i.id)">设为管理员</mdui-menu-item>
-            <mdui-menu-item>踢出房间</mdui-menu-item>
+            <mdui-menu-item v-show="!i.is_room_admin">设为管理员</mdui-menu-item>
+            <mdui-menu-item v-show="!(i.id == me)" @click="forceExit(i.id)">踢出房间</mdui-menu-item>
           </mdui-menu>
         </mdui-dropdown>
       </mdui-list>
@@ -204,6 +207,33 @@ import {setColorScheme} from 'mdui/functions/setColorScheme.js';
 import {io} from "socket.io-client";
 import {dialog} from "mdui/functions/dialog.js";
 
+const getSendInterval = (userCount) => {
+  // 定义基准发送时间间隔（例如，最少每 1 秒发送一次）
+  const baseInterval = 2000; // 1 秒
+
+  // 根据人数动态增加间隔，每增加 10 人，增加 1 秒（1000 毫秒）
+  const intervalIncrease = Math.floor(userCount / 10) * 1000;
+
+  // 限制最大时间间隔，以避免间隔过长
+  const maxInterval = 10000; // 最多每 10 秒发送一次
+
+  // 返回计算的时间间隔，但不超过最大时间间隔
+  return Math.min(baseInterval + intervalIncrease, maxInterval);
+}
+const updatePlayProgress = () => {
+  if (musicInfo.value.id == 0) {
+    return;
+  }
+  // 是否播放
+  if (music.value.paused) {
+    return;
+  }
+  console.log("update_progress")
+  socket.emit('update_progress', {
+    token: localStorage.getItem("sync_token"),
+    progress: music.value.currentTime,
+  })
+}
 const me = Number(localStorage.sync_user)
 const msgs_view_input = ref("");
 const msgs_view = ref(null);
@@ -273,6 +303,8 @@ socket.on("join", data => {
     is_admin: data.data.user.is_admin,
     in_room: data.data.user.in_room,
   })
+  clearInterval(updateProgressTimer)
+  updateProgressTimer = setInterval(updatePlayProgress, getSendInterval(people_view_data.value.length))
 })
 
 socket.on("quit", data => {
@@ -284,6 +316,41 @@ socket.on("quit", data => {
       break;
     }
   }
+})
+
+socket.on("force_exit", data => {
+  console.log(data)
+  if (data.data.id == me) {
+    snackbar({
+      message: "你已被管理员强制退出房间",
+      icon: 'error',
+    });
+    router.push("/")
+  }
+})
+
+socket.on("next", (data) => {
+  console.log(data)
+})
+
+socket.on("change", (data) => {
+  console.log("欢歌")
+  const item = data.data;
+  music.value.pause();
+  window.mul.cancel ? window.mul.cancel() : null;
+  musicInfo.value.name = item.name;
+  musicInfo.value.url = host + item.file;
+  musicInfo.value.singer = item.singer;
+  musicInfo.value.id = item.id;
+  music_img.value = item.image;
+  music.value.currTime = 0;
+  musicLyricText = item.lyric;
+  changeMusicLyricStyle(lyricModeStyle.value)
+  setTimeout(() => music.value.play(), 100)
+})
+
+socket.on("paused", (data) => {
+  data.data.paused ? music.value.pause() : music.value.play();
 })
 const roomInfo = ref({is_public: false});
 console.log(ID.value);
@@ -301,6 +368,17 @@ fetch(host + "/api/room/info/" + ID.value)
       } else {
         console.log("私密房间")
       }
+
+      let item = data.data.now_playing;
+      musicInfo.value.name = item.name;
+      musicInfo.value.url = host + item.file;
+      musicInfo.value.singer = item.singer;
+      musicInfo.value.id = item.id;
+      music_img.value = item.image;
+      music.value.currentTime = data.data.play_progress
+      musicLyricText = item.lyric;
+      changeMusicLyricStyle(lyricModeStyle.value)
+      setTimeout(() => data.data.paused ? music.value.pause() : music.value.play(), 100)
     })
     .catch(e => {
       console.error(e)
@@ -319,68 +397,24 @@ const send_msgs_msg = () => {
   })
   msgs_view_input.value = ""
 }
-const musicLyricText = `[00:00.00] 作曲 : Mark Maxwell/Matt Rhoades
-[00:07.84]I don't think I m gonna want you back
-[00:09.77]But I know it wont be easy like that
-[00:11.65]Don't you come around and make me feel bad when we both got no place
-[00:14.64]To go
-[00:15.35]I don't think I m gonna play your game
-[00:17.33]Coz it s only gonna end one way
-[00:19.26]Things are always gonna be the same
-[00:20.79]It you never want to let me know
-[00:22.77]Back back turn it around round
-[00:25.61]up and you re down down just let me know
-[00:30.38]in in in are you out oh it s killing me
-[00:34.24]now you could just let me go
-[00:37.09]Nothings to save you now
-[00:40.90]Not when you crashing down
-[00:44.71]Somebody break me out
-[00:48.52]There s nothing to run for baby we re done for
-[00:52.28]If you don't let let let me go
-[00:56.14]If you don't let let let me go
-[00:59.95]I don't wanna loo loo lose control
-[01:03.76]But you wont let let let me go
-[01:08.78]Now you call me on the telephone
-[01:10.61]You only want me when you re alone
-[01:12.54]Turn the car around and drive back home
-[01:14.26]Coz you re never gonna let me know
-[01:16.35]And every night that you fall asleep
-[01:18.28]While you re dreaming of me
-[01:20.16]I m begging you to set me free
-[01:21.73]I m begging you to let me go
-[01:23.76]Back back turn it around round
-[01:26.65]up and you re down down just let me know
-[01:31.32]in in in are you out oh it s killing me
-[01:35.08]now you could just let me go
-[01:38.08]Nothings to save you now
-[01:41.84]Not when you crashing down
-[01:45.65]Somebody break me out
-[01:49.41]There s nothing to run for baby we re done for
-[01:53.22]If you don't let let let me go
-[01:57.03]If you don't let let let me go
-[02:00.89]I don't wanna loo loo lose control
-[02:04.70]But you wont let let let me go
-[02:09.67]I waited patiently I know you had a place for me
-[02:13.53]But now you re blinded by the life you lead
-[02:16.17]I m letting you know
-[02:20.03]You mean so much to me
-[02:26.63]You re everything I want to be
-[02:28.71]But now you re taking it away from me
-[02:31.10]I m letting you go
-[02:39.17]Nothings to save you now
-[02:42.83]Not when you crashing down
-[02:46.64]Somebody break me out
-[02:50.35]There s nothing to run for baby we re done for
-[02:54.15]If you don't let let let me go
-[02:58.01]If you don't let let let me go
-[03:01.82]I don't wanna loo loo lose control
-[03:05.63]But you wont let let let me go
-[03:09.49]If you don't let let let me go
-[03:13.30]If you don't let let let me go
-[03:17.06]I don't wanna loo loo lose control
-[03:20.87]But you wont let let let me go`
+
+const forceExit = (id) => {
+  socket.emit("force_exit", {
+    token: localStorage.getItem("sync_token"),
+    id,
+  })
+}
+
+const changeMusic = (item) => {
+  console.log(item)
+  socket.emit("change", {
+    token: localStorage.getItem("sync_token"),
+    id: item.id,
+  })
+}
+let musicLyricText = `[00:00.00]没有正在播放的歌曲，请选择歌曲播放`;
 const bg_more = ref("rgba(255, 255, 255, 0.7)");
-const music_img = ref("/img.png")
+const music_img = ref("/ss128x128.png")
 const password = ref('');
 const is_paused = ref(true);
 const all_time = ref(1.0);
@@ -393,9 +427,12 @@ const is_show_music_lrc = ref(true);
 const lyricModeStyle = ref("al")
 const mdui_btn_color = ref("#efefef");
 const musicInfo = ref({
-  name: 'ME!',
-  singer: 'Taylor Swift / Brendon Urie',
+  name: '没有歌曲',
+  singer: '没有歌手',
+  url: '/def.mp3',
+  id: 0,
 })
+let updateProgressTimer = setInterval(updatePlayProgress, getSendInterval(people_view_data.value.length));
 watch(lyricModeStyle, (v) => {
   console.log("changeMusicLyricStyle")
 
@@ -431,7 +468,7 @@ onMounted(() => {
   //当音频加载完成时触发
   music.value.addEventListener("loadedmetadata", () => {
     all_time.value = music.value.duration;
-    changeMusicLyricStyle(lyricModeStyle.value)
+    //changeMusicLyricStyle(lyricModeStyle.value)
 
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -469,18 +506,40 @@ onMounted(() => {
   music.value.addEventListener("play", () => {
     is_paused.value = music.value.paused;
     console.log('play')
+    if (musicInfo.value.id != 0) {
+      socket.emit('paused', {
+        token: localStorage.getItem("sync_token"),
+        paused: music.value.paused,
+      })
+    }
 
   })
   music.value.addEventListener("pause", () => {
     is_paused.value = music.value.paused;
     console.log('pause')
+    if (musicInfo.value.id != 0) {
+      socket.emit('paused', {
+        token: localStorage.getItem("sync_token"),
+        paused: music.value.paused,
+      })
+    }
   })
   music.value.addEventListener("timeupdate", (e) => {
     now_time.value = music.value.currentTime;
   })
 
+  music.value.addEventListener("ended", () => {
+    console.log('播放完毕')
+    if (musicInfo.value.id != 0) {
+      socket.emit('complete', {
+        token: localStorage.getItem("sync_token"),
+      })
+    }
+  })
+
 
 })
+
 
 const tooglePlay = () => {
   if (is_paused.value) {
@@ -490,7 +549,7 @@ const tooglePlay = () => {
   }
 }
 
-const changeMusicLyricStyle = (mode) => {
+const changeMusicLyricStyle = (mode = "al") => {
   if (is_phone()) {
     if (mode === "al") {
       is_show_music_img.value = false;
@@ -580,10 +639,6 @@ const cancalDebounce = debounce(() => {
 
 window.addEventListener('resize', cancalDebounce);
 onUnmounted(() => {
-  window.removeEventListener('resize', cancalDebounce);
-  window.mul.cancel();
-  window.mul = null;
-  navigator.mediaSession.metadata = null;
   socket.emit("quit", {
     token: localStorage.getItem("sync_token"),
     room: ID.value,
@@ -591,6 +646,12 @@ onUnmounted(() => {
   socket.disconnect();
   socket.close();
   socket.removeAllListeners();
+  clearInterval(updateProgressTimer)
+  window.removeEventListener('resize', cancalDebounce);
+  if (window.mul.cancel) window.mul.cancel()
+  window.mul = null;
+  navigator.mediaSession.metadata = null;
+
 
 })
 
